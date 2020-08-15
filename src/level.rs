@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::error::Error;
 use rand::Rng;
-use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y};
+use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y, LEVEL_DIM};
 use rand::rngs::ThreadRng;
 
 #[derive(Deserialize, Debug)]
@@ -41,8 +41,8 @@ pub fn _read_level_from_file<P: AsRef<Path>>(path: P) -> Result<Level, Box<dyn E
 
 pub fn generate_level(suit: Suit) -> Level {
     let rng = rand::thread_rng();
-    let tiles_per_row = (WINDOW_RES_X / (TILE_RES * ZOOM)) as usize;
-    let tiles_per_column = (WINDOW_RES_Y / (TILE_RES * ZOOM)) as usize;
+    let tiles_per_row = LEVEL_DIM;
+    let tiles_per_column = LEVEL_DIM;
     let mut grid = Vec::new();
     for y in 0..tiles_per_column {
         let mut row = Vec::new();

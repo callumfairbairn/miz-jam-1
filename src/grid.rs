@@ -26,23 +26,11 @@ impl Grid {
     }
 
     pub fn new_from_level(level: Level, tile_info: &mut TileInfo, app: &App) -> Grid {
-        let tiles_per_row = (WINDOW_RES_X / (TILE_RES * ZOOM)) as usize;
-        let tiles_per_column = (WINDOW_RES_Y / (TILE_RES * ZOOM)) as usize;
         let mut grid = Vec::new();
 
-        if tiles_per_row != level.level[0].len() {
-            println!("Number of rows in level: {}, should be {}", level.level[0].len(), tiles_per_row);
-            panic!("Level has incorrect dimensions, closing...")
-        }
-
-        if tiles_per_column != level.level.len() {
-            println!("Number of columns in level: {}, should be {}", level.level.len(), tiles_per_column);
-            panic!("Level has incorrect dimensions, closing...")
-        }
-
-        for x in 0..tiles_per_row {
+        for x in 0..level.level.len() {
             let mut row = Vec::new();
-            for y in 0..tiles_per_column {
+            for y in 0..level.level.len() {
                 row.push(Tile::new(level.level[y][x], Point2::new(x as f32, y as f32), tile_info, app))
             }
             grid.push(row);
@@ -58,12 +46,18 @@ impl Grid {
     pub fn draw_background(&self, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>, player: &PlayerInstance) {
         let tile_coords = self.unique_tile_coords_in_grid();
         let Grid(vec) = self;
+        let view = Rect::from_x_y_w_h(
+            player.movement.x_pos(),
+            player.movement.y_pos(),
+            WINDOW_RES_X,
+            WINDOW_RES_Y
+        );
 
         for tile_coord in tile_coords {
             let mut tiles_with_coord = vec![];
             for row in vec {
                 for tile in row {
-                    if tile_coord == tile.tile_coord {
+                    if tile_coord == tile.tile_coord && is_tile_in_view(tile, view) {
                         tiles_with_coord.push(tile.clone());
                     }
                 }
@@ -99,7 +93,14 @@ impl Grid {
     }
 }
 
-
+fn is_tile_in_view(tile: &Tile, view: Rect) -> bool {
+    let x_loc = -WINDOW_RES_X/2.0 + (tile.location.x as f32 + 0.5 ) * TILE_RES * ZOOM;
+    let y_loc = WINDOW_RES_Y/2.0 - (tile.location.y as f32 + 0.5) * TILE_RES * ZOOM;
+    if x_loc + TILE_RES < view.left() || x_loc - TILE_RES > view.right() || y_loc + TILE_RES < view.bottom() || y_loc - TILE_RES > view.top() {
+        return false
+    }
+    true
+}
 
 impl Index<usize> for Grid {
     type Output = Vec<Tile>;
