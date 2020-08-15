@@ -34,45 +34,49 @@ impl Grid {
 
         for (y, row) in level.level.iter().enumerate() {
             for (x, tile) in row.iter().enumerate() {
-                let vertex_x_coord = quad_size_x * (x as f32) - (WINDOW_RES_X / 2.0);
-                let vertex_y_coord = quad_size_y * (y as f32) - (WINDOW_RES_Y / 2.0);
 
-                let tilesheet_x_pix_coord = (tile.x as f32) * (TILE_RES + GAP_BETWEEN_TILES);
-                let tilesheet_y_pix_coord = (tile.y as f32) * (TILE_RES + GAP_BETWEEN_TILES);
+                if let Some(tile_data) = tile {
+                    let vertex_x_coord = quad_size_x * (x as f32) - (WINDOW_RES_X / 2.0);
+                    let vertex_y_coord = quad_size_y * (y as f32) - (WINDOW_RES_Y / 2.0);
 
-                let tilesheet_x_tex_coord = tilesheet_x_pix_coord / (texture_size[0] as f32);
-                let tilesheet_y_tex_coord = tilesheet_y_pix_coord / (texture_size[1] as f32);
+                    let tilesheet_x_pix_coord = (tile_data.x as f32) * (TILE_RES + GAP_BETWEEN_TILES);
+                    let tilesheet_y_pix_coord = (tile_data.y as f32) * (TILE_RES + GAP_BETWEEN_TILES);
 
-                let tri_a = Tri([
-                    Vertex{
-                        point: Point3{x: vertex_x_coord, y: vertex_y_coord, z: 0.0},
-                        tex_coords: Point2{x: tilesheet_x_tex_coord, y: tilesheet_y_tex_coord + tile_tex_size_y}
-                    }.into(),
-                    Vertex{
-                        point: Point3{x: vertex_x_coord + quad_size_x, y: vertex_y_coord, z: 0.0},
-                        tex_coords: Point2{x: tilesheet_x_tex_coord + tile_tex_size_x, y: tilesheet_y_tex_coord + tile_tex_size_y}
-                    }.into(),
-                    Vertex{
-                        point: Point3{x: vertex_x_coord, y: vertex_y_coord + quad_size_y, z: 0.0},
-                        tex_coords: Point2{x: tilesheet_x_tex_coord, y: tilesheet_y_tex_coord}
-                    }.into()
-                ]);
-                let tri_b = Tri([
-                    Vertex{
-                        point: Point3{x: vertex_x_coord + quad_size_x, y: vertex_y_coord, z: 0.0},
-                        tex_coords: Point2{x: tilesheet_x_tex_coord + tile_tex_size_x, y: tilesheet_y_tex_coord + tile_tex_size_y}
-                    }.into(),
-                    Vertex{
-                        point: Point3{x: vertex_x_coord, y: vertex_y_coord + quad_size_y, z: 0.0},
-                        tex_coords: Point2{x: tilesheet_x_tex_coord, y: tilesheet_y_tex_coord}
-                    }.into(),
-                    Vertex{
-                        point: Point3{x: vertex_x_coord + quad_size_x, y: vertex_y_coord + quad_size_y, z: 0.0},
-                        tex_coords: Point2{x: tilesheet_x_tex_coord + tile_tex_size_x, y: tilesheet_y_tex_coord}
-                    }.into()
-                ]);
-                grid.push(tri_a);
-                grid.push(tri_b);
+                    let tilesheet_x_tex_coord = tilesheet_x_pix_coord / (texture_size[0] as f32);
+                    let tilesheet_y_tex_coord = tilesheet_y_pix_coord / (texture_size[1] as f32);
+
+                    let tri_a = Tri([
+                        Vertex{
+                            point: Point3{x: vertex_x_coord, y: vertex_y_coord, z: 0.0},
+                            tex_coords: Point2{x: tilesheet_x_tex_coord, y: tilesheet_y_tex_coord + tile_tex_size_y}
+                        }.into(),
+                        Vertex{
+                            point: Point3{x: vertex_x_coord + quad_size_x, y: vertex_y_coord, z: 0.0},
+                            tex_coords: Point2{x: tilesheet_x_tex_coord + tile_tex_size_x, y: tilesheet_y_tex_coord + tile_tex_size_y}
+                        }.into(),
+                        Vertex{
+                            point: Point3{x: vertex_x_coord, y: vertex_y_coord + quad_size_y, z: 0.0},
+                            tex_coords: Point2{x: tilesheet_x_tex_coord, y: tilesheet_y_tex_coord}
+                        }.into()
+                    ]);
+                    let tri_b = Tri([
+                        Vertex{
+                            point: Point3{x: vertex_x_coord + quad_size_x, y: vertex_y_coord, z: 0.0},
+                            tex_coords: Point2{x: tilesheet_x_tex_coord + tile_tex_size_x, y: tilesheet_y_tex_coord + tile_tex_size_y}
+                        }.into(),
+                        Vertex{
+                            point: Point3{x: vertex_x_coord, y: vertex_y_coord + quad_size_y, z: 0.0},
+                            tex_coords: Point2{x: tilesheet_x_tex_coord, y: tilesheet_y_tex_coord}
+                        }.into(),
+                        Vertex{
+                            point: Point3{x: vertex_x_coord + quad_size_x, y: vertex_y_coord + quad_size_y, z: 0.0},
+                            tex_coords: Point2{x: tilesheet_x_tex_coord + tile_tex_size_x, y: tilesheet_y_tex_coord}
+                        }.into()
+                    ]);
+                    grid.push(tri_a);
+                    grid.push(tri_b);
+                }
+                
             }
         }
 

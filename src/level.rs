@@ -1,16 +1,16 @@
-use crate::tile::IPoint2;
+use super::tile::IPoint2;
 use serde::Deserialize;
 use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
 use std::error::Error;
 use rand::Rng;
-use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y};
+use crate::constants::{LEVEL_DIM};
 use rand::rngs::ThreadRng;
 
 #[derive(Deserialize, Debug)]
 pub struct Level {
-    pub level: Vec<Vec<IPoint2>>
+    pub level: Vec<Vec<Option<IPoint2>>>
 }
 
 pub struct Suit {
@@ -41,16 +41,16 @@ pub fn _read_level_from_file<P: AsRef<Path>>(path: P) -> Result<Level, Box<dyn E
 
 pub fn generate_level(suit: Suit) -> Level {
     let rng = rand::thread_rng();
-    let tiles_per_row = (WINDOW_RES_X / (TILE_RES * ZOOM)) as usize;
-    let tiles_per_column = (WINDOW_RES_Y / (TILE_RES * ZOOM)) as usize;
+    let tiles_per_row = LEVEL_DIM;
+    let tiles_per_column = LEVEL_DIM;
     let mut grid = Vec::new();
     for y in 0..tiles_per_column {
         let mut row = Vec::new();
         for x in 0..tiles_per_row {
             if (x == 0 || y == 0) || (x == &tiles_per_row - 1 || y == &tiles_per_column - 1) {
-                row.push(get_tile(&suit.wall_tiles, rng))
+                row.push(Some(get_tile(&suit.wall_tiles, rng)))
             } else {
-                row.push(get_tile(&suit.floor_tiles, rng))
+                row.push(Some(get_tile(&suit.floor_tiles, rng)))
             }
         }
         grid.push(row);
