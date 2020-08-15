@@ -10,7 +10,7 @@ use rand::rngs::ThreadRng;
 
 #[derive(Deserialize, Debug)]
 pub struct Level {
-    pub level: Vec<Vec<IPoint2>>
+    pub level: Vec<Vec<Option<IPoint2>>>
 }
 
 pub struct Suit {
@@ -48,9 +48,9 @@ pub fn generate_level(suit: Suit) -> Level {
         let mut row = Vec::new();
         for x in 0..tiles_per_row {
             if (x == 0 || y == 0) || (x == &tiles_per_row - 1 || y == &tiles_per_column - 1) {
-                row.push(get_tile(&suit.wall_tiles, rng))
+                row.push(Some(get_tile(&suit.wall_tiles, rng)))
             } else {
-                row.push(get_tile(&suit.floor_tiles, rng))
+                row.push(Some(get_tile(&suit.floor_tiles, rng)))
             }
         }
         grid.push(row);
