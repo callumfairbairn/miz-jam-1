@@ -7,6 +7,7 @@ use crate::{
 };
 
 use std::rc::Rc;
+use crate::level::Level;
 
 pub struct InstanceState<'a> {
     pub pos: (f32, f32),
@@ -42,8 +43,8 @@ impl Instance {
     }
 
     // TODO: grid and check
-    pub fn movement_tick(&mut self, dirs: Direction) {
-        self.movement.tick(self.class.movement_attrs(), dirs);
+    pub fn movement_tick(&mut self, dirs: Direction, level: &Level) {
+        self.movement.tick(self.class.movement_attrs(), dirs, level);
     }
 
     pub fn action_tick(&mut self, new_action: Option<ActionType>, mobs: &mut [Instance]) {

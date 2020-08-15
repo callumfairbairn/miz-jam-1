@@ -28,17 +28,19 @@ use entity::{
     EntityFactory
 };
 use environment::EnvironmentState;
+use crate::level::Level;
 
 pub struct Model {
     grid: Grid,
     tile_tex: nannou::wgpu::Texture,
+    level: Level,
 
     env: EnvironmentState,
 }
 
 impl Model {
     pub fn tick(&mut self) {
-        self.env.player.movement_tick(self.env.dirs);
+        self.env.player.movement_tick(self.env.dirs, &self.level);
 
         self.env.player.action_tick(std::mem::replace(&mut self.env.player_action, None), &mut self.env.mobs);
 
@@ -70,6 +72,7 @@ fn model(app: &App) -> Model {
     Model {
         grid,
         tile_tex,
+        level,
 
         env
     }
