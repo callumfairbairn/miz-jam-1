@@ -7,6 +7,7 @@ pub struct Level {
     pub floor: Vec<Vec<Option<TileAttributes>>>,
 }
 
+#[derive(Clone)]
 pub struct TileAttributes {
     pub tile_coord: IPoint2,
     pub solid: bool
@@ -116,22 +117,19 @@ fn generate_floor(rng: ThreadRng) -> Vec<Vec<Option<&'static str>>> {
 
 pub fn generate_level(suit: Suit) -> Level {
     let rng = rand::thread_rng();
-    let mut grid = Vec::new();
+    let mut grid = vec![vec![None; LAYOUT_DIM * CHUNK_SIZE]; LAYOUT_DIM * CHUNK_SIZE];
     let floor = generate_floor(rng);
 
-    for y in 0..floor.len() {
-        let mut row = Vec::new();
-        for x in 0..floor[0].len() {
+    for (x, _) in grid.clone().iter().enumerate() {
+        for (y, _) in grid[x].clone().iter().enumerate() {
             if floor[x][y].is_some() {
-                match floor[x][y].unwrap() {
-                    "floor" => row.push(Some(TileAttributes { tile_coord: get_tile_coord(&suit.floor_tiles, rng), solid: false })),
-                    "wall" => row.push(Some(TileAttributes { tile_coord: get_tile_coord(&suit.wall_tiles, rng), solid: true })),
-                    _ => row.push(None)
+                if floor[x][y].unwrap() == "floor" {
+                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.floor_tiles, rng), solid: false })
+                } else if floor[x][y].unwrap() == "wall" {
+                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.wall_tiles, rng), solid: false })
                 }
-            } else {
             }
         }
-        grid.push(row);
     }
     Level{
         floor: grid,

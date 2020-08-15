@@ -6,6 +6,6 @@ pub(crate) const ZOOM: f32 = 2.0; // This must be a power of 2
 pub(crate) const WINDOW_RES_X: f32 = 832.0; // This must be a multiple of TILE_RES
 pub(crate) const WINDOW_RES_Y: f32 = 640.0; // This must be a multiple of TILE_RES
 
-pub(crate) const CHUNK_SIZE: usize = 12;
+pub(crate) const CHUNK_SIZE: usize = 15;
 pub(crate) const LAYOUT_DIM: usize = 5;
 pub(crate) const CHUNK_NUM: usize = 8;
