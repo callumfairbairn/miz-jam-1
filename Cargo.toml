@@ -1,5 +1,5 @@
 [package]
-name = "renderer"
+name = "miz-jam-1-game"
 version = "0.1.0"
 authors = ["callumfairbairn <callum.fairbairn@thoughtworks.com>"]
 edition = "2018"
@@ -10,3 +10,4 @@ edition = "2018"
 nannou = "0.14.1"
 serde_json = "1.0.56"
 serde = { version = "1.0.114", features = ["derive"] }
+rand = "0.7.3"
