@@ -1,6 +1,6 @@
 use super::tile::IPoint2;
 use rand::Rng;
-use crate::constants::{CHUNK_SIZE, LAYOUT_DIM, CHUNK_NUM};
+use crate::constants::{CHUNK_SIZE, LAYOUT_DIM, CHUNK_NUM, EROSION_TIMES, EROSION_CHANCE};
 use rand::rngs::ThreadRng;
 
 pub struct Level {
@@ -97,15 +97,12 @@ fn generate_floor(rng: ThreadRng) -> Vec<Vec<Option<&'static str>>> {
         }
     }
 
+    floor = erode(floor, rng);
+
     for (x, row) in floor.clone().iter().enumerate() {
         for (y, _) in row.iter().enumerate() {
             if floor[x][y].is_some() {
-                if  x == 0 || y == 0 || x == floor.len() - 1 || y == floor[0].len() - 1
-                    || floor[x + 1][y].is_none()
-                    || floor[x - 1][y].is_none()
-                    || floor[x][y + 1].is_none()
-                    || floor[x][y - 1].is_none()
-                {
+                if  is_on_edge(x, y, &floor) {
                     floor[x][y] = Some("wall");
                 }
             }
@@ -113,6 +110,31 @@ fn generate_floor(rng: ThreadRng) -> Vec<Vec<Option<&'static str>>> {
     }
 
     floor
+}
+
+fn is_on_edge(x: usize, y: usize, floor: &Vec<Vec<Option<&'static str>>>) -> bool {
+    return x == 0 || y == 0 || x == floor.len() - 1 || y == floor[0].len() - 1
+        || floor[x + 1][y].is_none()
+        || floor[x - 1][y].is_none()
+        || floor[x][y + 1].is_none()
+        || floor[x][y - 1].is_none()
+}
+
+fn erode(floor: Vec<Vec<Option<&'static str>>>, mut rng: ThreadRng) -> Vec<Vec<Option<&'static str>>> {
+    let mut new_floor = floor.clone();
+    for _ in 0..EROSION_TIMES {
+        for (x, _) in new_floor.clone().iter_mut().enumerate() {
+            for (y, _) in new_floor.clone().iter_mut().enumerate() {
+                if is_on_edge(x, y, &new_floor) {
+                    if rng.gen_bool(EROSION_CHANCE) {
+                        new_floor[x][y] = None
+                    }
+                }
+            }
+        }
+    }
+
+    new_floor
 }
 
 pub fn generate_level(suit: Suit) -> Level {
