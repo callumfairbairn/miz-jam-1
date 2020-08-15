@@ -56,7 +56,7 @@ fn model(app: &App) -> Model {
     let level = generate_level(hearts());
     let grid = Grid::new_from_level(level, &mut tile_info, app);
     // let grid = Grid::_new_from_tile(IPoint2{x: 5, y: 0}, &mut tile_info, app);
-    let player = PlayerInstance::new();
+    let player = PlayerInstance::new(&mut tile_info, app);
 
     let env = EnvironmentState::new();
 
@@ -74,5 +74,5 @@ fn model(app: &App) -> Model {
 fn view(app: &App, model: &Model, frame: Frame) {
     frame.clear(BLACK);
     model.grid.draw_background(app, &frame, &model.tile_info.coord_texture_map);
-    //model.player.draw_tile(app, &frame, &model.tile_info.coord_texture_map)
+    Tile::draw_player(app, &frame, &model.tile_info.coord_texture_map, &model.player)
 }

@@ -6,6 +6,7 @@ use nannou::{App, Frame};
 use nannou::wgpu::Texture;
 use std::collections::HashMap;
 use serde::Deserialize;
+use crate::entity::PlayerInstance;
 
 pub struct TileInfo {
     pub coord_texture_map: HashMap<IPoint2, Texture>,
@@ -33,6 +34,13 @@ impl Tile {
             tile_coord: tile_coord.clone(),
             location: game_location
         }
+    }
+
+    pub fn draw_player(app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>, player: &PlayerInstance) {
+        let draw = app.draw();
+        draw.texture(get_texture(&player.tile.tile_coord, coord_texture_map))
+            .x_y(0.0, 0.0);
+        draw.to_frame(app, frame).unwrap();
     }
 
     pub fn draw_tile(&self, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>) {
