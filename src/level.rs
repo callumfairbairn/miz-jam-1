@@ -96,6 +96,21 @@ fn generate_floor(rng: ThreadRng) -> Vec<Vec<Option<&'static str>>> {
         }
     }
 
+    for (x, row) in floor.clone().iter().enumerate() {
+        for (y, _) in row.iter().enumerate() {
+            if floor[x][y].is_some() {
+                if  x == 0 || y == 0 || x == floor.len() - 1 || y == floor[0].len() - 1
+                    || floor[x + 1][y].is_none()
+                    || floor[x - 1][y].is_none()
+                    || floor[x][y + 1].is_none()
+                    || floor[x][y - 1].is_none()
+                {
+                    floor[x][y] = Some("wall");
+                }
+            }
+        }
+    }
+
     floor
 }
 
@@ -107,7 +122,6 @@ pub fn generate_level(suit: Suit) -> Level {
     for y in 0..floor.len() {
         let mut row = Vec::new();
         for x in 0..floor[0].len() {
-            // if (x == 0 || y == 0) || (x == &tiles_per_row - 1 || y == &tiles_per_column - 1) {
             if floor[x][y].is_some() {
                 match floor[x][y].unwrap() {
                     "floor" => row.push(Some(TileAttributes { tile_coord: get_tile_coord(&suit.floor_tiles, rng), solid: false })),
