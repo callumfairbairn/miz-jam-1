@@ -6,17 +6,7 @@ use crate::level::Level;
 use crate::entity::PlayerInstance;
 use nannou::geom::Tri;
 
-#[derive(Clone)]
-struct Vertex {
-    point: Point3,
-    tex_coords: Point2,
-}
-
-impl From<Vertex> for (Point3, Point2) {
-    fn from(v: Vertex) -> Self {
-        (v.point, v.tex_coords)
-    }
-}
+use super::Vertex;
 
 #[derive(Clone)]
 pub struct Grid {
@@ -29,7 +19,7 @@ impl Grid {
         let tiles_per_column = (WINDOW_RES_Y / (TILE_RES * ZOOM)) as usize;
         let mut grid = Vec::new();
 
-        if tiles_per_row != level.level[0].len() {
+        /*if tiles_per_row != level.level[0].len() {
             println!("Number of rows in level: {}, should be {}", level.level[0].len(), tiles_per_row);
             panic!("Level has incorrect dimensions, closing...")
         }
@@ -37,14 +27,13 @@ impl Grid {
         if tiles_per_column != level.level.len() {
             println!("Number of columns in level: {}, should be {}", level.level.len(), tiles_per_column);
             panic!("Level has incorrect dimensions, closing...")
-        }
+        }*/
 
-        let quad_size_x = (TILE_RES * ZOOM);
-        let quad_size_y = (TILE_RES * ZOOM);
+        let quad_size_x = TILE_RES * ZOOM;
+        let quad_size_y = TILE_RES * ZOOM;
 
         let tile_tex_size_x = TILE_RES / (texture_size[0] as f32);
         let tile_tex_size_y = TILE_RES / (texture_size[1] as f32);
-        let tile_tex_y_offset = 1.0 - ((TILE_RES + GAP_BETWEEN_TILES) / (texture_size[1] as f32));
 
         for (y, row) in level.level.iter().enumerate() {
             for (x, tile) in row.iter().enumerate() {

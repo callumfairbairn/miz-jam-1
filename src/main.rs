@@ -2,7 +2,6 @@ mod level;
 mod update;
 mod event;
 mod tile;
-mod grid;
 mod constants;
 
 mod entity;
@@ -12,9 +11,8 @@ use nannou::{
     image::open
 };
 
-
 use constants::{WINDOW_RES_X, WINDOW_RES_Y};
-use grid::Grid;
+use tile::{Grid, Tile};
 use event::event;
 use update::update;
 use level::{generate_level, hearts};
@@ -52,7 +50,7 @@ fn model(app: &App) -> Model {
 
     let level = generate_level(hearts());
     let grid = Grid::new_from_level(level, &tile_tex.size());
-    let player = PlayerInstance::new();
+    let player = PlayerInstance::new(Tile::new(26, 7, &tile_tex.size()));
 
     let env = EnvironmentState::new();
 
@@ -81,10 +79,21 @@ fn view(app: &App, model: &Model, frame: Frame) {
         lod_min_clamp: 1.0,
         lod_max_clamp: 1.0,
         compare_function: nannou::wgpu::CompareFunction::Never,
-    }).mesh().tris_textured(&model.tile_tex, model.grid.vertices.clone());
+    }).translate(nannou::geom::Vector3::new(-model.player.movement.x_pos(), -model.player.movement.y_pos(), 0.0))
+        .mesh().tris_textured(&model.tile_tex, model.grid.vertices.clone());
 
     // Draw player...
-    //draw.mesh().tris_textured(&model.player.tile ?, model.grid.vertices.clone());
+    draw.sampler(nannou::wgpu::SamplerDescriptor{
+        address_mode_u: nannou::wgpu::AddressMode::Repeat,
+        address_mode_v: nannou::wgpu::AddressMode::Repeat,
+        address_mode_w: nannou::wgpu::AddressMode::Repeat,
+        mag_filter: nannou::wgpu::FilterMode::Nearest,
+        min_filter: nannou::wgpu::FilterMode::Nearest,
+        mipmap_filter: nannou::wgpu::FilterMode::Nearest,
+        lod_min_clamp: 1.0,
+        lod_max_clamp: 1.0,
+        compare_function: nannou::wgpu::CompareFunction::Never,
+    }).mesh().tris_textured(&model.tile_tex, model.player.tile.vertices.clone());
 
     // Finish
     draw.to_frame(app, &frame).unwrap();
