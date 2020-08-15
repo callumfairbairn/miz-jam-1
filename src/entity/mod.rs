@@ -19,7 +19,7 @@ impl EntityFactory {
         Self(Rc::new(entity))
     }
 
-    pub fn spawn(&self, at_coords: (usize, usize), with_tile: Tile) -> Instance {
+    pub fn spawn(&self, at_coords: (f64, f64), with_tile: Tile) -> Instance {
         Instance::new(self.0.clone(), at_coords, with_tile)
     }
 }
