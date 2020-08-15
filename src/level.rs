@@ -5,7 +5,7 @@ use std::fs::File;
 use std::io::BufReader;
 use std::error::Error;
 use rand::Rng;
-use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y, LEVEL_DIM};
+use crate::constants::{LEVEL_DIM};
 use rand::rngs::ThreadRng;
 
 #[derive(Deserialize, Debug)]

@@ -38,11 +38,6 @@ impl Grid {
         Grid(grid)
     }
 
-    pub fn len(&self) -> usize {
-        let Grid(vec) = self;
-        vec.len()
-    }
-
     pub fn draw_background(&self, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>, player: &PlayerInstance) {
         let tile_coords = self.unique_tile_coords_in_grid();
         let Grid(vec) = self;
