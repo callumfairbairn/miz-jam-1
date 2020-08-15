@@ -13,7 +13,7 @@ pub struct Grid {
 }
 
 impl Grid {
-    pub fn new_from_level(level: Level, texture_size: &[u32; 2]) -> Self {
+    pub fn new_from_level(level: &Level, texture_size: &[u32; 2]) -> Self {
         let mut grid = Vec::new();
 
         let quad_size_x = TILE_RES * ZOOM;

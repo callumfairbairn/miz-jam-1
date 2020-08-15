@@ -49,8 +49,8 @@ fn model(app: &App) -> Model {
     let tile_tex = wgpu::Texture::from_image(app, &tile_image);
 
     let level = generate_level(hearts());
-    let grid = Grid::new_from_level(level, &tile_tex.size());
-    let player = PlayerInstance::new(Tile::new(26, 7, &tile_tex.size()));
+    let grid = Grid::new_from_level(&level, &tile_tex.size());
+    let player = PlayerInstance::new(Tile::new(26, 7, &tile_tex.size()), &level);
 
     let env = EnvironmentState::new();
 
