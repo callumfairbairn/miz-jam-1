@@ -1,40 +1,28 @@
-use nannou::App;
-use crate::Model;
-use nannou::prelude::{WindowEvent, Key};
-use nannou::event::WindowEvent::{KeyPressed, KeyReleased};
-
-pub struct KeyDownStatus {
-    pub w: bool,
-    pub s: bool,
-    pub a: bool,
-    pub d: bool,
-}
-
-impl KeyDownStatus {
-    pub fn new() -> KeyDownStatus {
-        KeyDownStatus{ w: false, s: false, a: false, d: false}
-    }
-}
+use nannou::{
+    App,
+    prelude::{WindowEvent, Key}
+};
+use crate::{
+    Model,
+    entity::Direction
+};
 
 pub fn event(_app: &App, model: &mut Model, event: WindowEvent) {
     match event {
-        KeyPressed(key) => {
-            update_key_down_status(key, model, true)
-        }
-        KeyReleased(key) => {
-            update_key_down_status(key, model, false)
-        }
-        _ => {}
-    }
-}
-
-fn update_key_down_status(key: Key, model: &mut Model, key_down: bool) {
-    match key {
-        Key::W => model.key_down_status.w = key_down,
-        Key::S => model.key_down_status.s = key_down,
-        Key::A => model.key_down_status.a = key_down,
-        Key::D => model.key_down_status.d = key_down,
-        Key::P => std::process::exit(0),
-        _ => {}
+        WindowEvent::KeyPressed(k) => match k {
+            Key::W => model.env.dirs.insert(Direction::UP),
+            Key::A => model.env.dirs.insert(Direction::LEFT),
+            Key::S => model.env.dirs.insert(Direction::DOWN),
+            Key::D => model.env.dirs.insert(Direction::RIGHT),
+            _ => ()
+        },
+        WindowEvent::KeyReleased(k) => match k {
+            Key::W => model.env.dirs.remove(Direction::UP),
+            Key::A => model.env.dirs.remove(Direction::LEFT),
+            Key::S => model.env.dirs.remove(Direction::DOWN),
+            Key::D => model.env.dirs.remove(Direction::RIGHT),
+            _ => ()
+        },
+        _ => (),
     }
 }
