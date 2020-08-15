@@ -8,23 +8,23 @@ use crate::action::*;
 
 use std::collections::HashMap;
 
-pub trait Entity {
+/*pub trait Entity {
     fn movement_attrs<'a>(&'a self) -> &'a MovementAttributes;
-}
+}*/
 
-pub struct PlayerEntity {
+pub struct Entity {
     move_attrs: MovementAttributes,
     actions: HashMap<ActionType, ActionAttributes>
 }
 
-impl PlayerEntity {
-    pub fn new_pawn() -> PlayerEntity {
+impl Entity {
+    pub fn new_pawn() -> Entity {
         let mut actions_map = HashMap::new();
         actions_map.insert(ActionType::AttackA, ActionAttributes{
-            wind_up: 8,
-            active: 10,
-            wind_down: 6,
-            action: |env| {
+            wind_up: 4,
+            active: 2,
+            wind_down: 2,
+            action: |player, mobs| {
                 println!("Action triggered!");
             }
         });
@@ -39,10 +39,8 @@ impl PlayerEntity {
             actions: actions_map,
         }
     }
-}
 
-impl Entity for PlayerEntity {
-    fn movement_attrs<'a>(&'a self) -> &'a MovementAttributes {
+    pub fn movement_attrs<'a>(&'a self) -> &'a MovementAttributes {
         &self.move_attrs
     }
 }

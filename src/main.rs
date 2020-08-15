@@ -19,7 +19,6 @@ use event::event;
 use update::update;
 use level::{generate_level, hearts};
 use entity::{
-    PlayerInstance,
     Instance
 };
 use environment::EnvironmentState;
@@ -28,13 +27,14 @@ pub struct Model {
     grid: Grid,
     tile_tex: nannou::wgpu::Texture,
 
-    player: PlayerInstance,
     env: EnvironmentState,
 }
 
 impl Model {
     pub fn tick(&mut self) {
-        self.player.tick(&mut self.env);
+        self.env.player.movement_tick(self.env.dirs);
+
+        self.env.player.action_tick(std::mem::replace(&mut self.env.player_action, None), &mut self.env.mobs);
     }
 }
 
@@ -52,15 +52,14 @@ fn model(app: &App) -> Model {
 
     let level = generate_level(hearts());
     let grid = Grid::new_from_level(level, &tile_tex.size());
-    let player = PlayerInstance::new(Tile::new(26, 7, &tile_tex.size()));
+    let player = Instance::new(Tile::new(26, 7, &tile_tex.size()));
 
-    let env = EnvironmentState::new();
+    let env = EnvironmentState::new(player);
 
     Model {
         grid,
         tile_tex,
 
-        player,
         env
     }
 }
@@ -81,7 +80,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
         lod_min_clamp: 1.0,
         lod_max_clamp: 1.0,
         compare_function: nannou::wgpu::CompareFunction::Never,
-    }).translate(nannou::geom::Vector3::new(-model.player.movement.x_pos(), -model.player.movement.y_pos(), 0.0))
+    }).translate(nannou::geom::Vector3::new(-model.env.player.state.movement.x_pos(), -model.env.player.state.movement.y_pos(), 0.0))
         .mesh().tris_textured(&model.tile_tex, model.grid.vertices.clone());
 
     // Draw player...
@@ -95,7 +94,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
         lod_min_clamp: 1.0,
         lod_max_clamp: 1.0,
         compare_function: nannou::wgpu::CompareFunction::Never,
-    }).mesh().tris_textured(&model.tile_tex, model.player.tile.vertices.clone());
+    }).mesh().tris_textured(&model.tile_tex, model.env.player.tile.vertices.clone());
 
     // Finish
     draw.to_frame(app, &frame).unwrap();
