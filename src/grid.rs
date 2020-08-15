@@ -1,31 +1,30 @@
-use crate::constants::{TILE_RES, ZOOM, WINDOW_RES_X, WINDOW_RES_Y};
+use crate::constants::{TILE_RES, ZOOM, WINDOW_RES_X, WINDOW_RES_Y, GAP_BETWEEN_TILES};
 use nannou::prelude::*;
-use std::ops::{Index, IndexMut};
-use crate::tile::{Tile, IPoint2};
-use crate::{TileInfo};
 use std::collections::HashMap;
 use nannou::wgpu::Texture;
 use crate::level::Level;
 use crate::entity::PlayerInstance;
+use nannou::geom::Tri;
 
-pub(crate) struct Grid(Vec<Vec<Tile>>);
+#[derive(Clone)]
+struct Vertex {
+    point: Point3,
+    tex_coords: Point2,
+}
+
+impl From<Vertex> for (Point3, Point2) {
+    fn from(v: Vertex) -> Self {
+        (v.point, v.tex_coords)
+    }
+}
+
+#[derive(Clone)]
+pub struct Grid {
+    pub vertices: Vec<Tri<(Point3, Point2)>>
+}
 
 impl Grid {
-    pub fn _new_from_tile(tile_coord: IPoint2, tile_info: &mut TileInfo, app: &App) -> Grid {
-        let tiles_per_row = (WINDOW_RES_X / (TILE_RES * ZOOM)) as usize;
-        let tiles_per_column = (WINDOW_RES_Y / (TILE_RES * ZOOM)) as usize;
-        let mut grid = Vec::new();
-        for x in 0..tiles_per_row {
-            let mut row = Vec::new();
-            for y in 0..tiles_per_column {
-                row.push(Tile::new(tile_coord, Point2::new(x as f32, y as f32), tile_info, app))
-            }
-            grid.push(row);
-        }
-        Grid(grid)
-    }
-
-    pub fn new_from_level(level: Level, tile_info: &mut TileInfo, app: &App) -> Grid {
+    pub fn new_from_level(level: Level, texture_size: &[u32; 2]) -> Self {
         let tiles_per_row = (WINDOW_RES_X / (TILE_RES * ZOOM)) as usize;
         let tiles_per_column = (WINDOW_RES_Y / (TILE_RES * ZOOM)) as usize;
         let mut grid = Vec::new();
@@ -40,78 +39,61 @@ impl Grid {
             panic!("Level has incorrect dimensions, closing...")
         }
 
-        for x in 0..tiles_per_row {
-            let mut row = Vec::new();
-            for y in 0..tiles_per_column {
-                row.push(Tile::new(level.level[y][x], Point2::new(x as f32, y as f32), tile_info, app))
+        let quad_size_x = (TILE_RES * ZOOM);
+        let quad_size_y = (TILE_RES * ZOOM);
+
+        let tile_tex_size_x = TILE_RES / (texture_size[0] as f32);
+        let tile_tex_size_y = TILE_RES / (texture_size[1] as f32);
+        let tile_tex_y_offset = 1.0 - ((TILE_RES + GAP_BETWEEN_TILES) / (texture_size[1] as f32));
+
+        for (y, row) in level.level.iter().enumerate() {
+            for (x, tile) in row.iter().enumerate() {
+                let vertex_x_coord = quad_size_x * (x as f32) - (WINDOW_RES_X / 2.0);
+                let vertex_y_coord = quad_size_y * (y as f32) - (WINDOW_RES_Y / 2.0);
+
+                let tilesheet_x_pix_coord = (tile.x as f32) * (TILE_RES + GAP_BETWEEN_TILES);
+                let tilesheet_y_pix_coord = (tile.y as f32) * (TILE_RES + GAP_BETWEEN_TILES);
+
+                let tilesheet_x_tex_coord = tilesheet_x_pix_coord / (texture_size[0] as f32);
+                let tilesheet_y_tex_coord = tilesheet_y_pix_coord / (texture_size[1] as f32);
+
+                println!("Adding tile: {},{} image: {},{}, at ({}, {}) | ({}, {})", x, y, tile.x, tile.y, vertex_x_coord, vertex_y_coord, tilesheet_x_tex_coord, tilesheet_y_tex_coord);
+
+                let tri_a = Tri([
+                    Vertex{
+                        point: Point3{x: vertex_x_coord, y: vertex_y_coord, z: 0.0},
+                        tex_coords: Point2{x: tilesheet_x_tex_coord, y: tilesheet_y_tex_coord + tile_tex_size_y}
+                    }.into(),
+                    Vertex{
+                        point: Point3{x: vertex_x_coord + quad_size_x, y: vertex_y_coord, z: 0.0},
+                        tex_coords: Point2{x: tilesheet_x_tex_coord + tile_tex_size_x, y: tilesheet_y_tex_coord + tile_tex_size_y}
+                    }.into(),
+                    Vertex{
+                        point: Point3{x: vertex_x_coord, y: vertex_y_coord + quad_size_y, z: 0.0},
+                        tex_coords: Point2{x: tilesheet_x_tex_coord, y: tilesheet_y_tex_coord}
+                    }.into()
+                ]);
+                let tri_b = Tri([
+                    Vertex{
+                        point: Point3{x: vertex_x_coord + quad_size_x, y: vertex_y_coord, z: 0.0},
+                        tex_coords: Point2{x: tilesheet_x_tex_coord + tile_tex_size_x, y: tilesheet_y_tex_coord + tile_tex_size_y}
+                    }.into(),
+                    Vertex{
+                        point: Point3{x: vertex_x_coord, y: vertex_y_coord + quad_size_y, z: 0.0},
+                        tex_coords: Point2{x: tilesheet_x_tex_coord, y: tilesheet_y_tex_coord}
+                    }.into(),
+                    Vertex{
+                        point: Point3{x: vertex_x_coord + quad_size_x, y: vertex_y_coord + quad_size_y, z: 0.0},
+                        tex_coords: Point2{x: tilesheet_x_tex_coord + tile_tex_size_x, y: tilesheet_y_tex_coord}
+                    }.into()
+                ]);
+                grid.push(tri_a);
+                grid.push(tri_b);
             }
-            grid.push(row);
         }
-        Grid(grid)
-    }
 
-    pub fn len(&self) -> usize {
-        let Grid(vec) = self;
-        vec.len()
-    }
-
-    pub fn draw_background(&self, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>, player: &PlayerInstance) {
-        let tile_coords = self.unique_tile_coords_in_grid();
-        let Grid(vec) = self;
-
-        for tile_coord in tile_coords {
-            let mut tiles_with_coord = vec![];
-            for row in vec {
-                for tile in row {
-                    if tile_coord == tile.tile_coord {
-                        tiles_with_coord.push(tile.clone());
-                    }
-                }
-            }
-            Tile::draw_tiles(tiles_with_coord, app, frame, coord_texture_map, player);
+        Self {
+            vertices: grid
         }
-    }
-
-    fn unique_tile_coords_in_grid(&self) -> Vec<IPoint2> {
-        //ssc = tile sheet coord
-        let mut sscs = vec![];
-        let Grid(vec) = self;
-        for row in vec {
-            for tile in row {
-                let ssc = &tile.tile_coord;
-                if !sscs.contains(ssc) {
-                    sscs.push(ssc.clone());
-                }
-            }
-        }
-        sscs
-    }
-
-    // Replaces tile in grid that has the same location as the one provided
-    pub fn _add_tile(&mut self, tile: Tile) {
-        self[tile.location.x as usize][tile.location.y as usize] = tile.clone();
-    }
-
-    pub fn _add_tiles(&mut self, tiles: Vec<Tile>) {
-        for tile in tiles {
-            self[tile.location.x as usize][tile.location.y as usize] = tile.clone();
-        }
-    }
-}
-
-
-
-impl Index<usize> for Grid {
-    type Output = Vec<Tile>;
-    fn index(&self, index: usize) -> &Vec<Tile> {
-        let Grid(vec) = self;
-        &vec[index]
-    }
-}
-
-impl IndexMut<usize> for Grid {
-    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
-        let Grid(vec) = self;
-        &mut vec[index]
     }
 }

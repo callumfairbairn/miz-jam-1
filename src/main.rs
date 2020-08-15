@@ -12,11 +12,9 @@ use nannou::{
     image::open
 };
 
-use std::collections::HashMap;
 
 use constants::{WINDOW_RES_X, WINDOW_RES_Y};
 use grid::Grid;
-use tile::{Tile, IPoint2, TileInfo};
 use event::event;
 use update::update;
 use level::{generate_level, hearts};
@@ -28,7 +26,7 @@ use entity::{
 
 pub struct Model {
     grid: Grid,
-    tile_info: TileInfo,
+    tile_tex: nannou::wgpu::Texture,
 
     player: PlayerInstance,
     env: EnvironmentState,
@@ -49,30 +47,36 @@ fn main() {
 fn model(app: &App) -> Model {
     app.new_window().size(WINDOW_RES_X as u32, WINDOW_RES_Y as u32).event(event).view(view).build().unwrap();
 
-    let tile_sheet = open(app.assets_path().unwrap().join("tilesheet.png")).unwrap();
-    let coord_texture_map = HashMap::new();
-    let mut tile_info = TileInfo{ tile_sheet, coord_texture_map };
+    let tile_image = open(app.assets_path().unwrap().join("tilesheet.png")).unwrap();
+    let tile_tex = wgpu::Texture::from_image(app, &tile_image);
 
     let level = generate_level(hearts());
-    let grid = Grid::new_from_level(level, &mut tile_info, app);
-    // let grid = Grid::_new_from_tile(IPoint2{x: 5, y: 0}, &mut tile_info, app);
-    let player = PlayerInstance::new(&mut tile_info, app);
+    let grid = Grid::new_from_level(level, &tile_tex.size());
+    let player = PlayerInstance::new();
 
     let env = EnvironmentState::new();
 
     Model {
         grid,
-        tile_info,
+        tile_tex,
 
         player,
         env
     }
 }
 
-
-
 fn view(app: &App, model: &Model, frame: Frame) {
-    frame.clear(BLACK);
-    model.grid.draw_background(app, &frame, &model.tile_info.coord_texture_map, &model.player);
-    Tile::draw_player(app, &frame, &model.tile_info.coord_texture_map, &model.player)
+    let draw = app.draw();
+
+    draw.background().color(BLACK);
+
+    // Draw background...
+    // TODO: set sample descriptor so its not all blurry
+    draw.mesh().tris_textured(&model.tile_tex, model.grid.vertices.clone());
+
+    // Draw player...
+    //draw.mesh().tris_textured(&model.player.tile ?, model.grid.vertices.clone());
+
+    // Finish
+    draw.to_frame(app, &frame).unwrap();
 }
