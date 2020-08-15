@@ -43,10 +43,11 @@ impl Tile {
         draw.to_frame(app, frame).unwrap();
     }
 
-    pub fn draw_tile(&self, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>) {
+    pub fn _draw_tile(&self, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>, player: &PlayerInstance) {
         let draw = app.draw();
         draw.texture(get_texture(&self.tile_coord, coord_texture_map))
-            .x_y(-WINDOW_RES_X/2.0 + ((self.location.x + 0.5 ) * TILE_RES * ZOOM), WINDOW_RES_Y/2.0 - ((self.location.y + 0.5) * TILE_RES * ZOOM) );
+            .x_y(-WINDOW_RES_X/2.0 + ((self.location.x + 0.5 ) * TILE_RES * ZOOM - player.movement.x_pos()),
+                 WINDOW_RES_Y/2.0 - ((self.location.y + 0.5) * TILE_RES * ZOOM) );
         draw.to_frame(app, frame).unwrap();
     }
 

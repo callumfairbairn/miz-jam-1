@@ -16,7 +16,7 @@ use std::collections::HashMap;
 
 use constants::{WINDOW_RES_X, WINDOW_RES_Y};
 use grid::Grid;
-use tile::{Tile, IPoint2, TileInfo};
+use tile::{Tile, TileInfo};
 use event::event;
 use update::update;
 use level::{generate_level, hearts};
