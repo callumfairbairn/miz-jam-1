@@ -23,14 +23,14 @@ pub struct Instance {
 }
 
 impl Instance {
-    pub fn new(from_entity: Rc<Entity>, at_coords: (usize, usize), tile: Tile) -> Self {
+    pub fn new(from_entity: Rc<Entity>, at_coords: (f64, f64), tile: Tile) -> Self {
         Self {
             class: from_entity,
             action: None,
             tile: tile,
 
             state: InstanceState {
-                movement: MovementState::new(at_coords.0, at_coords.1),
+                movement: MovementState::new(at_coords),
             }
         }
     }

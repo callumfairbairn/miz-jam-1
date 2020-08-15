@@ -59,7 +59,7 @@ pub struct MovementState {
 }
 
 impl MovementState {
-    pub fn new(x: usize, y: usize) -> Self {
+    pub fn new((x, y): (f64, f64)) -> Self {
         Self {
             x: x as f64,
             y: y as f64,

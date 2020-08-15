@@ -17,7 +17,11 @@ use constants::{WINDOW_RES_X, WINDOW_RES_Y};
 use tile::{Grid, Tile};
 use event::event;
 use update::update;
-use level::{generate_level, hearts};
+use level::{
+    generate_level,
+    generate_starting_position,
+    hearts
+};
 use entity::{
     Entity,
     EntityFactory
@@ -52,9 +56,11 @@ fn model(app: &App) -> Model {
     let tile_tex = wgpu::Texture::from_image(app, &tile_image);
 
     let level = generate_level(hearts());
-    let grid = Grid::new_from_level(level, &tile_tex.size());
-    let player_instance = EntityFactory::new(Entity::new_pawn());
-    let player = player_instance.spawn((0, 0), Tile::new(26, 7, &tile_tex.size()));
+    let grid = Grid::new_from_level(&level, &tile_tex.size());
+    let player_entity = EntityFactory::new(Entity::new_pawn());
+
+    let start_pos = generate_starting_position(&level);
+    let player = player_entity.spawn(start_pos, Tile::new(26, 7, &tile_tex.size()));
 
     let env = EnvironmentState::new(player);
 
