@@ -20,14 +20,15 @@ impl EntityFactory {
     }
 
     pub fn spawn(&self, at_coords: (f64, f64), with_tile: Tile) -> Instance {
-        Instance::new(self.0.clone(), at_coords, with_tile)
+        Instance::new(&self.0, at_coords, with_tile)
     }
 }
 
 
 pub struct Entity {
     move_attrs: MovementAttributes,
-    actions: HashMap<ActionType, ActionAttributes>
+    actions: HashMap<ActionType, ActionAttributes>,
+    initial_state: InstanceAttributes
 }
 
 impl Entity {
@@ -38,7 +39,7 @@ impl Entity {
             active: 2,
             wind_down: 2,
             action: |player, mobs| {
-                println!("Action triggered!");
+                println!("Action triggered! Mobs: {}", mobs.len());
                 
             }
         });
@@ -51,6 +52,22 @@ impl Entity {
             },
 
             actions: actions_map,
+
+            initial_state: InstanceAttributes {}
+        }
+    }
+
+    pub fn card_2() -> Entity {
+        Self {
+            move_attrs: MovementAttributes {
+                attack: 8.0,
+                sustain: 10.0,
+                release:  7.0
+            },
+
+            actions: HashMap::new(),
+
+            initial_state: InstanceAttributes {}
         }
     }
 }

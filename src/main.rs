@@ -62,7 +62,7 @@ fn model(app: &App) -> Model {
     let start_pos = generate_starting_position(&level);
     let player = player_entity.spawn(start_pos, Tile::new(26, 7, &tile_tex.size()));
 
-    let env = EnvironmentState::new(player);
+    let env = EnvironmentState::new(player, &level, &tile_tex.size());
 
     Model {
         grid,
@@ -78,21 +78,27 @@ fn view(app: &App, model: &Model, frame: Frame) {
     draw.background().color(BLACK);
 
     // Draw background...
-    draw.sampler(nannou::wgpu::SamplerDescriptor{
-        address_mode_u: nannou::wgpu::AddressMode::Repeat,
-        address_mode_v: nannou::wgpu::AddressMode::Repeat,
-        address_mode_w: nannou::wgpu::AddressMode::Repeat,
-        mag_filter: nannou::wgpu::FilterMode::Nearest,
-        min_filter: nannou::wgpu::FilterMode::Nearest,
-        mipmap_filter: nannou::wgpu::FilterMode::Nearest,
-        lod_min_clamp: 1.0,
-        lod_max_clamp: 1.0,
-        compare_function: nannou::wgpu::CompareFunction::Never,
-    }).translate(nannou::geom::Vector3::new(-model.env.player.state.movement.x_pos(), -model.env.player.state.movement.y_pos(), 0.0))
+    draw.sampler(sampler_desc())
+        .translate(nannou::geom::Vector3::new(-model.env.player.movement.x_pos(), -model.env.player.movement.y_pos(), 0.0))
         .mesh().tris_textured(&model.tile_tex, model.grid.vertices.clone());
 
     // Draw player...
-    draw.sampler(nannou::wgpu::SamplerDescriptor{
+    draw.sampler(sampler_desc())
+        .mesh().tris_textured(&model.tile_tex, model.env.player.tile.vertices.clone());
+
+    // Draw mobs...
+    for mob in &model.env.mobs {
+        draw.sampler(sampler_desc())
+        .translate(nannou::geom::Vector3::new(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos(), 0.0))
+        .mesh().tris_textured(&model.tile_tex, mob.tile.vertices.clone());
+    }
+
+    // Finish
+    draw.to_frame(app, &frame).unwrap();
+}
+
+const fn sampler_desc() -> nannou::wgpu::SamplerDescriptor {
+    nannou::wgpu::SamplerDescriptor{
         address_mode_u: nannou::wgpu::AddressMode::Repeat,
         address_mode_v: nannou::wgpu::AddressMode::Repeat,
         address_mode_w: nannou::wgpu::AddressMode::Repeat,
@@ -102,8 +108,5 @@ fn view(app: &App, model: &Model, frame: Frame) {
         lod_min_clamp: 1.0,
         lod_max_clamp: 1.0,
         compare_function: nannou::wgpu::CompareFunction::Never,
-    }).mesh().tris_textured(&model.tile_tex, model.env.player.tile.vertices.clone());
-
-    // Finish
-    draw.to_frame(app, &frame).unwrap();
+    }
 }

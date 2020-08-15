@@ -1,5 +1,5 @@
 use crate::{
-    entity::{Instance, InstanceState}
+    entity::{Instance, InstanceAttributes}
 };
 
 #[derive(PartialEq, Eq, Hash, Copy, Clone)]
@@ -23,7 +23,7 @@ pub struct ActionAttributes {
     pub active: u16,      // Num of ticks active
     pub wind_down: u16,   // Num of ticks to wind down
 
-    pub action: fn(&mut InstanceState, &mut [Instance])
+    pub action: fn(&mut InstanceAttributes, &mut [Instance])
 }
 
 pub struct ActiveActionState {
@@ -52,7 +52,7 @@ impl ActiveActionState {
     }
 
     // Returns true if done.
-    pub fn tick(&mut self, player: &mut InstanceState, mobs: &mut [Instance]) -> bool {
+    pub fn tick(&mut self, player: &mut InstanceAttributes, mobs: &mut [Instance]) -> bool {
         self.count += 1;
         self.state = match self.state {
             ActionState::WindUp if self.count > self.attrs.wind_up => {
