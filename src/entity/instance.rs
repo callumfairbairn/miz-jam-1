@@ -6,6 +6,8 @@ use crate::{
     tile::Tile
 };
 
+use std::rc::Rc;
+
 pub struct InstanceState {
     pub movement: MovementState,
 
@@ -13,7 +15,7 @@ pub struct InstanceState {
 }
 
 pub struct Instance {
-    class: Entity,
+    class: Rc<Entity>,
     action: Option<ActiveActionState>,
     pub tile: Tile,
 
@@ -21,14 +23,14 @@ pub struct Instance {
 }
 
 impl Instance {
-    pub fn new(tile: Tile) -> Self {
+    pub fn new(from_entity: Rc<Entity>, at_coords: (usize, usize), tile: Tile) -> Self {
         Self {
-            class: Entity::new_pawn(),
+            class: from_entity,
             action: None,
             tile: tile,
 
             state: InstanceState {
-                movement: MovementState::new(0, 0),
+                movement: MovementState::new(at_coords.0, at_coords.1),
             }
         }
     }
@@ -39,7 +41,6 @@ impl Instance {
     }
 
     pub fn action_tick(&mut self, new_action: Option<ActionType>, mobs: &mut [Instance]) {
-        // TODO: Check any incoming actions first...
         if let Some(action) = new_action {
             if self.action.as_ref().map(|a| a.cancel()).unwrap_or(true) {
                 self.action = self.class.actions.get(&action).map(|attrs| ActiveActionState::new(attrs));
@@ -53,22 +54,3 @@ impl Instance {
         }
     }
 }
-
-/*impl Instance for PlayerInstance {
-    fn tick(&mut self, env: &mut EnvironmentState) {
-        self.movement.tick(self.class.movement_attrs(), env.dirs);
-
-        // TODO: Check any incoming actions first...
-        if let Some(action) = std::mem::replace(&mut env.player_action, None) {
-            if self.action.as_ref().map(|a| a.cancel()).unwrap_or(true) {
-                self.action = self.class.actions.get(&action).map(|attrs| ActiveActionState::new(attrs));
-            }
-        }
-
-        if let Some(action) = &mut self.action {
-            if action.tick(self, env) {
-                self.action = None;
-            }
-        }
-    }
-}*/

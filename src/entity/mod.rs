@@ -4,13 +4,26 @@ mod movement;
 pub use instance::*;
 pub use movement::*;
 
-use crate::action::*;
+use crate::{
+    action::*,
+    tile::Tile
+};
 
 use std::collections::HashMap;
+use std::rc::Rc;
 
-/*pub trait Entity {
-    fn movement_attrs<'a>(&'a self) -> &'a MovementAttributes;
-}*/
+pub struct EntityFactory(Rc<Entity>);
+
+impl EntityFactory {
+    pub fn new(entity: Entity) -> Self {
+        Self(Rc::new(entity))
+    }
+
+    pub fn spawn(&self, at_coords: (usize, usize), with_tile: Tile) -> Instance {
+        Instance::new(self.0.clone(), at_coords, with_tile)
+    }
+}
+
 
 pub struct Entity {
     move_attrs: MovementAttributes,
@@ -26,6 +39,7 @@ impl Entity {
             wind_down: 2,
             action: |player, mobs| {
                 println!("Action triggered!");
+                
             }
         });
 
@@ -39,7 +53,9 @@ impl Entity {
             actions: actions_map,
         }
     }
+}
 
+impl Entity {
     pub fn movement_attrs<'a>(&'a self) -> &'a MovementAttributes {
         &self.move_attrs
     }

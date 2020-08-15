@@ -19,7 +19,8 @@ use event::event;
 use update::update;
 use level::{generate_level, hearts};
 use entity::{
-    Instance
+    Entity,
+    EntityFactory
 };
 use environment::EnvironmentState;
 
@@ -52,7 +53,8 @@ fn model(app: &App) -> Model {
 
     let level = generate_level(hearts());
     let grid = Grid::new_from_level(level, &tile_tex.size());
-    let player = Instance::new(Tile::new(26, 7, &tile_tex.size()));
+    let player_instance = EntityFactory::new(Entity::new_pawn());
+    let player = player_instance.spawn((0, 0), Tile::new(26, 7, &tile_tex.size()));
 
     let env = EnvironmentState::new(player);
 
