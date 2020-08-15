@@ -96,7 +96,8 @@ impl Grid {
 fn is_tile_in_view(tile: &Tile, view: Rect) -> bool {
     let x_loc = -WINDOW_RES_X/2.0 + (tile.location.x as f32 + 0.5 ) * TILE_RES * ZOOM;
     let y_loc = WINDOW_RES_Y/2.0 - (tile.location.y as f32 + 0.5) * TILE_RES * ZOOM;
-    if x_loc + TILE_RES < view.left() || x_loc - TILE_RES > view.right() || y_loc + TILE_RES < view.bottom() || y_loc - TILE_RES > view.top() {
+    let buffer = TILE_RES + 10.0;
+    if x_loc + buffer < view.left() || x_loc - buffer > view.right() || y_loc + buffer < view.bottom() || y_loc - buffer > view.top() {
         return false
     }
     true
