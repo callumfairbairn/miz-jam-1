@@ -1,4 +1,4 @@
-use crate::tile::IPoint2;
+use super::tile::IPoint2;
 use serde::Deserialize;
 use std::path::Path;
 use std::fs::File;
