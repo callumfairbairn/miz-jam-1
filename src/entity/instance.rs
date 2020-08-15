@@ -8,9 +8,15 @@ use crate::{
 
 use std::rc::Rc;
 
+pub struct InstanceState<'a> {
+    pub pos: (f32, f32),
+    pub attrs: &'a mut InstanceAttributes
+}
+
 #[derive(Clone)]
 pub struct InstanceAttributes {
-    // HP?
+    pub max_hp: usize,
+    pub current_hp: usize,
 }
 
 pub struct Instance {
@@ -47,7 +53,11 @@ impl Instance {
         }
 
         if let Some(action) = &mut self.action {
-            if action.tick(&mut self.state, mobs) {
+            let mut state = InstanceState {
+                pos: (self.movement.x_pos(), self.movement.y_pos()),
+                attrs: &mut self.state
+            };
+            if action.tick(&mut state, mobs) {
                 self.action = None;
             }
         }

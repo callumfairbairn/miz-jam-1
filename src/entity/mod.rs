@@ -38,10 +38,7 @@ impl Entity {
             wind_up: 4,
             active: 2,
             wind_down: 2,
-            action: |player, mobs| {
-                println!("Action triggered! Mobs: {}", mobs.len());
-                
-            }
+            action: crate::action::attack::quick_attack
         });
 
         Self {
@@ -53,7 +50,10 @@ impl Entity {
 
             actions: actions_map,
 
-            initial_state: InstanceAttributes {}
+            initial_state: InstanceAttributes {
+                max_hp: 10,
+                current_hp: 10,
+            }
         }
     }
 
@@ -67,7 +67,10 @@ impl Entity {
 
             actions: HashMap::new(),
 
-            initial_state: InstanceAttributes {}
+            initial_state: InstanceAttributes {
+                max_hp: 3,
+                current_hp: 3,
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ mod constants;
 mod entity;
 mod action;
 mod environment;
+mod rect;
 
 use nannou::{
     prelude::*,
@@ -40,6 +41,7 @@ impl Model {
         self.env.player.movement_tick(self.env.dirs);
 
         self.env.player.action_tick(std::mem::replace(&mut self.env.player_action, None), &mut self.env.mobs);
+
     }
 }
 
