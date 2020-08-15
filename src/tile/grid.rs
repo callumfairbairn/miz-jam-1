@@ -1,10 +1,9 @@
 use crate::constants::{TILE_RES, ZOOM, WINDOW_RES_X, WINDOW_RES_Y, GAP_BETWEEN_TILES};
-use nannou::prelude::*;
-use std::collections::HashMap;
-use nannou::wgpu::Texture;
+use nannou::{
+    prelude::*,
+    geom::Tri
+};
 use crate::level::Level;
-use crate::entity::PlayerInstance;
-use nannou::geom::Tri;
 
 use super::Vertex;
 
@@ -15,8 +14,6 @@ pub struct Grid {
 
 impl Grid {
     pub fn new_from_level(level: Level, texture_size: &[u32; 2]) -> Self {
-        let tiles_per_row = (WINDOW_RES_X / (TILE_RES * ZOOM)) as usize;
-        let tiles_per_column = (WINDOW_RES_Y / (TILE_RES * ZOOM)) as usize;
         let mut grid = Vec::new();
 
         /*if tiles_per_row != level.level[0].len() {

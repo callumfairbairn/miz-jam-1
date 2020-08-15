@@ -1,11 +1,8 @@
-use crate::constants::{TILE_RES, ZOOM, WINDOW_RES_X, WINDOW_RES_Y, GAP_BETWEEN_TILES};
-use nannou::image::imageops::{FilterType};
-use nannou::image::{DynamicImage};
-use nannou::prelude::{Point3, Point2, wgpu};
-use nannou::{App, Frame};
-use nannou::wgpu::Texture;
-use nannou::geom::Tri;
-use std::collections::HashMap;
+use crate::constants::{TILE_RES, ZOOM, GAP_BETWEEN_TILES};
+use nannou::{
+    prelude::{Point3, Point2},
+    geom::Tri
+};
 
 use super::Vertex;
 
