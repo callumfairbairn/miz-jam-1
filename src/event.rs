@@ -4,7 +4,8 @@ use nannou::{
 };
 use crate::{
     Model,
-    entity::Direction
+    entity::Direction,
+    action::ActionType
 };
 
 pub fn event(_app: &App, model: &mut Model, event: WindowEvent) {
@@ -14,6 +15,7 @@ pub fn event(_app: &App, model: &mut Model, event: WindowEvent) {
             Key::A => model.env.dirs.insert(Direction::LEFT),
             Key::S => model.env.dirs.insert(Direction::DOWN),
             Key::D => model.env.dirs.insert(Direction::RIGHT),
+            Key::Space => model.env.player_action = Some(ActionType::AttackA),
             _ => ()
         },
         WindowEvent::KeyReleased(k) => match k {

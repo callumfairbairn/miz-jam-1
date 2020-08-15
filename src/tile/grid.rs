@@ -15,17 +15,7 @@ pub struct Grid {
 impl Grid {
     pub fn new_from_level(level: Level, texture_size: &[u32; 2]) -> Self {
         let mut grid = Vec::new();
-
-        /*if tiles_per_row != level.level[0].len() {
-            println!("Number of rows in level: {}, should be {}", level.level[0].len(), tiles_per_row);
-            panic!("Level has incorrect dimensions, closing...")
-        }
-
-        if tiles_per_column != level.level.len() {
-            println!("Number of columns in level: {}, should be {}", level.level.len(), tiles_per_column);
-            panic!("Level has incorrect dimensions, closing...")
-        }*/
-
+        
         let quad_size_x = TILE_RES * ZOOM;
         let quad_size_y = TILE_RES * ZOOM;
 
@@ -76,7 +66,6 @@ impl Grid {
                     grid.push(tri_a);
                     grid.push(tri_b);
                 }
-                
             }
         }
 

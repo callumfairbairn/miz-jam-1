@@ -5,6 +5,8 @@ mod tile;
 mod constants;
 
 mod entity;
+mod action;
+mod environment;
 
 use nannou::{
     prelude::*,
@@ -18,9 +20,9 @@ use update::update;
 use level::{generate_level, hearts};
 use entity::{
     PlayerInstance,
-    Instance,
-    EnvironmentState
+    Instance
 };
+use environment::EnvironmentState;
 
 pub struct Model {
     grid: Grid,
@@ -32,7 +34,7 @@ pub struct Model {
 
 impl Model {
     pub fn tick(&mut self) {
-        self.player.tick(&self.env);
+        self.player.tick(&mut self.env);
     }
 }
 
