@@ -8,4 +8,4 @@ pub(crate) const WINDOW_RES_Y: f32 = 640.0; // This must be a multiple of TILE_R
 
 pub(crate) const CHUNK_SIZE: usize = 12;
 pub(crate) const LAYOUT_DIM: usize = 5;
-pub(crate) const CHUNK_NUM: usize = 10;
+pub(crate) const CHUNK_NUM: usize = 8;
