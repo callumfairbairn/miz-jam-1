@@ -5,21 +5,39 @@ mod tile;
 mod grid;
 mod constants;
 
-use nannou::prelude::*;
-use crate::constants::{WINDOW_RES_X, WINDOW_RES_Y};
-use nannou::image::open;
-use crate::grid::Grid;
-use crate::tile::{Tile, IPoint2, TileInfo};
-use crate::event::{event, KeyDownStatus};
-use crate::update::update;
+mod entity;
+
+use nannou::{
+    prelude::*,
+    image::open
+};
+
 use std::collections::HashMap;
-use crate::level::{generate_level, hearts};
+
+use constants::{WINDOW_RES_X, WINDOW_RES_Y};
+use grid::Grid;
+use tile::{Tile, IPoint2, TileInfo};
+use event::event;
+use update::update;
+use level::{generate_level, hearts};
+use entity::{
+    PlayerInstance,
+    Instance,
+    EnvironmentState
+};
 
 pub struct Model {
-    player: Tile,
     grid: Grid,
-    key_down_status: KeyDownStatus,
-    tile_info: TileInfo
+    tile_info: TileInfo,
+
+    player: PlayerInstance,
+    env: EnvironmentState,
+}
+
+impl Model {
+    pub fn tick(&mut self) {
+        self.player.tick(&self.env);
+    }
 }
 
 fn main() {
@@ -38,12 +56,16 @@ fn model(app: &App) -> Model {
     let level = generate_level(hearts());
     let grid = Grid::new_from_level(level, &mut tile_info, app);
     // let grid = Grid::_new_from_tile(IPoint2{x: 5, y: 0}, &mut tile_info, app);
+    let player = PlayerInstance::new();
+
+    let env = EnvironmentState::new();
 
     Model {
-        player: Tile::new(IPoint2{x: 25, y: 7}, Point2::new(4.0, 4.0), &mut tile_info, app),
         grid,
-        key_down_status: KeyDownStatus::new(),
-        tile_info
+        tile_info,
+
+        player,
+        env
     }
 }
 
@@ -52,5 +74,5 @@ fn model(app: &App) -> Model {
 fn view(app: &App, model: &Model, frame: Frame) {
     frame.clear(BLACK);
     model.grid.draw_background(app, &frame, &model.tile_info.coord_texture_map);
-    model.player.draw_tile(app, &frame, &model.tile_info.coord_texture_map)
+    //model.player.draw_tile(app, &frame, &model.tile_info.coord_texture_map)
 }
