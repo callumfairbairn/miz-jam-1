@@ -71,8 +71,17 @@ fn view(app: &App, model: &Model, frame: Frame) {
     draw.background().color(BLACK);
 
     // Draw background...
-    // TODO: set sample descriptor so its not all blurry
-    draw.mesh().tris_textured(&model.tile_tex, model.grid.vertices.clone());
+    draw.sampler(nannou::wgpu::SamplerDescriptor{
+        address_mode_u: nannou::wgpu::AddressMode::Repeat,
+        address_mode_v: nannou::wgpu::AddressMode::Repeat,
+        address_mode_w: nannou::wgpu::AddressMode::Repeat,
+        mag_filter: nannou::wgpu::FilterMode::Nearest,
+        min_filter: nannou::wgpu::FilterMode::Nearest,
+        mipmap_filter: nannou::wgpu::FilterMode::Nearest,
+        lod_min_clamp: 1.0,
+        lod_max_clamp: 1.0,
+        compare_function: nannou::wgpu::CompareFunction::Never,
+    }).mesh().tris_textured(&model.tile_tex, model.grid.vertices.clone());
 
     // Draw player...
     //draw.mesh().tris_textured(&model.player.tile ?, model.grid.vertices.clone());

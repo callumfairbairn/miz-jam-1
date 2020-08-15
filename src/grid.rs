@@ -57,8 +57,6 @@ impl Grid {
                 let tilesheet_x_tex_coord = tilesheet_x_pix_coord / (texture_size[0] as f32);
                 let tilesheet_y_tex_coord = tilesheet_y_pix_coord / (texture_size[1] as f32);
 
-                println!("Adding tile: {},{} image: {},{}, at ({}, {}) | ({}, {})", x, y, tile.x, tile.y, vertex_x_coord, vertex_y_coord, tilesheet_x_tex_coord, tilesheet_y_tex_coord);
-
                 let tri_a = Tri([
                     Vertex{
                         point: Point3{x: vertex_x_coord, y: vertex_y_coord, z: 0.0},
