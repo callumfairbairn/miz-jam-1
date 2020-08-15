@@ -148,7 +148,7 @@ pub fn generate_level(suit: Suit) -> Level {
                 if floor[x][y].unwrap() == "floor" {
                     grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.floor_tiles, rng), solid: false })
                 } else if floor[x][y].unwrap() == "wall" {
-                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.wall_tiles, rng), solid: false })
+                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.wall_tiles, rng), solid: true })
                 }
             }
         }
@@ -170,9 +170,9 @@ pub fn generate_starting_position(level: &Level) -> (f64, f64) {
     let mut x;
     let mut y;
     loop {
-        x = rng.gen_range(0, level.floor.len());
-        y = rng.gen_range(0, level.floor[x].len());
-        if level.floor[x][y].is_some() && !level.floor[x][y].as_ref().unwrap().solid {
+        y = rng.gen_range(0, level.floor.len());
+        x = rng.gen_range(0, level.floor[y].len());
+        if level.floor[y][x].is_some() && !level.floor[y][x].as_ref().unwrap().solid {
             let quad_size_x = TILE_RES * ZOOM;
             let quad_size_y = TILE_RES * ZOOM;
 
