@@ -1,16 +1,15 @@
 use super::tile::IPoint2;
-use serde::Deserialize;
-use std::path::Path;
-use std::fs::File;
-use std::io::BufReader;
-use std::error::Error;
 use rand::Rng;
 use crate::constants::{LEVEL_DIM};
 use rand::rngs::ThreadRng;
 
-#[derive(Deserialize, Debug)]
 pub struct Level {
-    pub level: Vec<Vec<Option<IPoint2>>>
+    pub floor: Vec<Vec<Option<TileAttributes>>>,
+}
+
+pub struct TileAttributes {
+    pub tile_coord: IPoint2,
+    pub solid: bool
 }
 
 pub struct Suit {
@@ -32,13 +31,6 @@ pub fn _spades() -> Suit {
     }
 }
 
-pub fn _read_level_from_file<P: AsRef<Path>>(path: P) -> Result<Level, Box<dyn Error>> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    let level = serde_json::from_reader(reader)?;
-    Ok(level)
-}
-
 pub fn generate_level(suit: Suit) -> Level {
     let rng = rand::thread_rng();
     let tiles_per_row = LEVEL_DIM;
@@ -48,16 +40,18 @@ pub fn generate_level(suit: Suit) -> Level {
         let mut row = Vec::new();
         for x in 0..tiles_per_row {
             if (x == 0 || y == 0) || (x == &tiles_per_row - 1 || y == &tiles_per_column - 1) {
-                row.push(Some(get_tile(&suit.wall_tiles, rng)))
+                row.push(Some(TileAttributes { tile_coord: get_tile_coord(&suit.wall_tiles, rng), solid: true }))
             } else {
-                row.push(Some(get_tile(&suit.floor_tiles, rng)))
+                row.push(Some(TileAttributes { tile_coord: get_tile_coord(&suit.floor_tiles, rng), solid: false }))
             }
         }
         grid.push(row);
     }
-    Level{ level: grid }
+    Level{
+        floor: grid,
+    }
 }
 
-fn get_tile(possible_tiles: &Vec<IPoint2>, mut rng: ThreadRng) -> IPoint2 {
+fn get_tile_coord(possible_tiles: &Vec<IPoint2>, mut rng: ThreadRng) -> IPoint2 {
     possible_tiles[rng.gen_range(0, possible_tiles.len())]
 }
