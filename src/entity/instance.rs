@@ -19,6 +19,7 @@ pub struct InstanceAttributes {
     pub current_hp: usize,
 }
 
+#[derive(Clone)]
 pub struct Instance {
     class: Rc<Entity>,
     action: Option<ActiveActionState>,

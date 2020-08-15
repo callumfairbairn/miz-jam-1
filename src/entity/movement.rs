@@ -50,6 +50,7 @@ pub struct MovementAttributes {
 }
 
 // Defines the state of a entity in space.
+#[derive(Clone)]
 pub struct MovementState {
     x: f64,
     y: f64,

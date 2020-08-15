@@ -28,6 +28,7 @@ pub struct ActionAttributes {
     pub action: fn(&mut InstanceState, &mut [Instance])
 }
 
+#[derive(Clone)]
 pub struct ActiveActionState {
     state: ActionState,
     count: u16,   // Count to the next state

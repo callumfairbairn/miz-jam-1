@@ -42,6 +42,7 @@ impl Model {
 
         self.env.player.action_tick(std::mem::replace(&mut self.env.player_action, None), &mut self.env.mobs);
 
+        self.env.mobs = self.env.mobs.iter().filter(|mob| mob.state.current_hp > 0).cloned().collect::<Vec<_>>();
     }
 }
 
