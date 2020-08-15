@@ -50,11 +50,12 @@ impl Tile {
         draw.to_frame(app, frame).unwrap();
     }
 
-    pub fn draw_tiles(tiles: Vec<Tile>, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>) {
+    pub fn draw_tiles(tiles: Vec<Tile>, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>, player: &PlayerInstance) {
         let draw = app.draw();
         for tile in tiles {
             draw.texture(get_texture(&tile.tile_coord, coord_texture_map))
-                .x_y(-WINDOW_RES_X/2.0 + ((tile.location.x as f32 + 0.5 ) * TILE_RES * ZOOM), WINDOW_RES_Y/2.0 - ((tile.location.y as f32 + 0.5) * TILE_RES * ZOOM) );
+                .x_y(-WINDOW_RES_X/2.0 + ((tile.location.x as f32 + 0.5 ) * TILE_RES * ZOOM - player.movement.x_pos()),
+                     WINDOW_RES_Y/2.0 - ((tile.location.y as f32 + 0.5) * TILE_RES * ZOOM) - player.movement.y_pos());
         }
         draw.to_frame(app, frame).unwrap();
     }

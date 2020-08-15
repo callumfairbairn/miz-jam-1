@@ -73,6 +73,6 @@ fn model(app: &App) -> Model {
 
 fn view(app: &App, model: &Model, frame: Frame) {
     frame.clear(BLACK);
-    model.grid.draw_background(app, &frame, &model.tile_info.coord_texture_map);
+    model.grid.draw_background(app, &frame, &model.tile_info.coord_texture_map, &model.player);
     Tile::draw_player(app, &frame, &model.tile_info.coord_texture_map, &model.player)
 }

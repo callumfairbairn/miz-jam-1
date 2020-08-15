@@ -6,6 +6,7 @@ use crate::{TileInfo};
 use std::collections::HashMap;
 use nannou::wgpu::Texture;
 use crate::level::Level;
+use crate::entity::PlayerInstance;
 
 pub(crate) struct Grid(Vec<Vec<Tile>>);
 
@@ -54,7 +55,7 @@ impl Grid {
         vec.len()
     }
 
-    pub fn draw_background(&self, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>) {
+    pub fn draw_background(&self, app: &App, frame: &Frame, coord_texture_map: &HashMap<IPoint2, Texture>, player: &PlayerInstance) {
         let tile_coords = self.unique_tile_coords_in_grid();
         let Grid(vec) = self;
 
@@ -67,7 +68,7 @@ impl Grid {
                     }
                 }
             }
-            Tile::draw_tiles(tiles_with_coord, app, frame, coord_texture_map);
+            Tile::draw_tiles(tiles_with_coord, app, frame, coord_texture_map, player);
         }
     }
 
