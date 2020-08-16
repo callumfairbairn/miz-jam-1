@@ -11,6 +11,7 @@ use std::rc::Rc;
 use std::collections::VecDeque;
 use crate::level::Level;
 use crate::entity::random_direction;
+use crate::constants::{AI_IDLE_WAIT_TIME, AI_IDLE_MOVEMENT_TIME};
 
 pub struct InstanceState<'a> {
     pub pos: (f32, f32),
@@ -115,18 +116,23 @@ impl Instance {
         }
     }
 
+    fn ai_idle(&mut self) {
+        if self.state.tick_tracker >= AI_IDLE_WAIT_TIME {
+            if self.state.tick_tracker == AI_IDLE_WAIT_TIME {
+                self.state.set_direction(random_direction());
+            }
+
+            if self.state.tick_tracker > AI_IDLE_WAIT_TIME + AI_IDLE_MOVEMENT_TIME {
+                self.state.reset_tick_tracker();
+                self.state.set_direction(Default::default());
+            }
+        }
+    }
+
+
     pub fn ai_tick(&mut self, level: &Level) {
         if self.state.is_active() {
-            if self.state.tick_tracker >= 60 {
-                if self.state.tick_tracker == 60 {
-                    self.state.set_direction(random_direction());
-                }
-
-                if self.state.tick_tracker > 65 {
-                    self.state.reset_tick_tracker();
-                    self.state.set_direction(Default::default());
-                }
-            }
+            self.ai_idle();
             self.movement.tick(self.class.movement_attrs(), self.state.direction, level);
             self.state.increment_tick_tracker();
         }

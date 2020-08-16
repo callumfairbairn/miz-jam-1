@@ -16,6 +16,9 @@ pub(crate) const EROSION_TIMES: i32 = 2;
 
 pub(crate) const COLLISION_MULTIPLIER: f64 = 0.2;
 
+pub(crate) const AI_IDLE_WAIT_TIME: i32 = 60;
+pub(crate) const AI_IDLE_MOVEMENT_TIME: i32 = 5;
+
 pub(crate) const HEARTS_BACKGROUND_COLOUR: wgpu::Color = wgpu::Color{
     r: 0.02,
     g: 0.0,
