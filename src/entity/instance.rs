@@ -10,6 +10,7 @@ use crate::{
 use std::rc::Rc;
 use std::collections::VecDeque;
 use crate::level::Level;
+use crate::entity::random_direction;
 
 pub struct InstanceState<'a> {
     pub pos: (f32, f32),
@@ -22,6 +23,9 @@ pub struct InstanceAttributes {
     current_hp: isize,
 
     is_active: bool,
+
+    tick_tracker: i32,
+    direction: Direction,
 }
 
 impl InstanceAttributes {
@@ -31,6 +35,9 @@ impl InstanceAttributes {
             current_hp: hp,
 
             is_active: true,
+
+            tick_tracker: 0,
+            direction: random_direction(),
         }
     }
 
@@ -43,6 +50,18 @@ impl InstanceAttributes {
 
     pub fn is_active(&self) -> bool {
         self.is_active
+    }
+
+    pub fn increment_tick_tracker(&mut self) {
+        self.tick_tracker += 1;
+    }
+
+    pub fn reset_tick_tracker(&mut self) {
+        self.tick_tracker = 0;
+    }
+
+    pub fn set_direction(&mut self, dirs: Direction) {
+        self.direction = dirs;
     }
 }
 
@@ -93,6 +112,23 @@ impl Instance {
                     self.action = None;
                 }
             }
+        }
+    }
+
+    pub fn ai_tick(&mut self, level: &Level) {
+        if self.state.is_active() {
+            if self.state.tick_tracker >= 60 {
+                if self.state.tick_tracker == 60 {
+                    self.state.set_direction(random_direction());
+                }
+
+                if self.state.tick_tracker > 65 {
+                    self.state.reset_tick_tracker();
+                    self.state.set_direction(Default::default());
+                }
+            }
+            self.movement.tick(self.class.movement_attrs(), self.state.direction, level);
+            self.state.increment_tick_tracker();
         }
     }
 }

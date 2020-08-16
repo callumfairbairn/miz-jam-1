@@ -63,14 +63,7 @@ impl Model {
         }
         self.env.inactive.append(&mut dead);
 
-        for mob in self.env.mobs.iter_mut() {
-            // AI
-            if let Some(a) = mob.animations.front_mut() {
-                if a.tick() {
-                    mob.animations.pop_front();
-                }
-            }
-        }
+        self.env.mob_tick(&self.level);
 
         for inactive in self.env.inactive.iter_mut() {
             // AI

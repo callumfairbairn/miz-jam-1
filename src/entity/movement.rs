@@ -2,6 +2,7 @@ use bitflags::bitflags;
 use crate::level::Level;
 use crate::constants::{COLLISION_MULTIPLIER};
 use crate::level::Side::{LEFT, RIGHT, TOP, BOTTOM};
+use rand::Rng;
 
 bitflags! {
     #[derive(Default)]
@@ -43,6 +44,15 @@ impl Direction {
 
         (x, y)
     }
+}
+
+pub fn random_direction() -> Direction {
+    let mut rng = rand::thread_rng();
+    let num = rng.gen_range(0, 4);
+    if num == 0 { return Direction::UP };
+    if num == 1 { return Direction::DOWN };
+    if num == 2 { return Direction::LEFT };
+    Direction::RIGHT
 }
 
 // Defines the core attributes of an entity's movement.
