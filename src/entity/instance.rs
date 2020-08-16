@@ -37,7 +37,7 @@ impl InstanceAttributes {
             is_active: true,
 
             tick_tracker: 0,
-            direction: random_direction(),
+            direction: Default::default(),
         }
     }
 
