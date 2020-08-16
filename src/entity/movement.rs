@@ -1,6 +1,7 @@
 use bitflags::bitflags;
 use crate::level::Level;
 use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y};
+use crate::level::Side::{LEFT, RIGHT, UP, DOWN};
 
 bitflags! {
     #[derive(Default)]
@@ -162,11 +163,13 @@ impl MovementState {
         };
 
         let mut collision = false;
+        let mut collision_directions = Vec::new();
 
         for (y, row) in level.floor.iter().enumerate() {
             for (x, tile) in row.iter().enumerate() {
                 if tile.is_some() {
-                    if tile.as_ref().unwrap().solid {
+                    let tile = tile.as_ref().unwrap();
+                    if tile.solid {
                         let quad_size = TILE_RES * ZOOM;
                         let vertex_x = quad_size * (x as f32) - (WINDOW_RES_X / 2.0);
                         let vertex_y = quad_size * (y as f32) - (WINDOW_RES_Y / 2.0);
@@ -175,8 +178,21 @@ impl MovementState {
                             pos: (vertex_x, vertex_y),
                             size: (quad_size, quad_size),
                         };
+
                         if player_rect.collides_with(&tile_rect) {
                             collision = true;
+                            if tile.exposed_sides.contains(&LEFT) && new_x_velo > 0.0 {
+                                collision_directions.push("x")
+                            }
+                            if tile.exposed_sides.contains(&RIGHT) && new_x_velo < 0.0 {
+                                collision_directions.push("x")
+                            }
+                            if tile.exposed_sides.contains(&UP) && new_y_velo < 0.0 {
+                                collision_directions.push("y")
+                            }
+                            if tile.exposed_sides.contains(&DOWN) && new_y_velo > 0.0 {
+                                collision_directions.push("y")
+                            }
                         }
                     }
                 }
@@ -189,9 +205,16 @@ impl MovementState {
             self.x_velo = new_x_velo;
             self.y_velo = new_y_velo;
         } else {
-            self.x_velo = 0.0;
-            self.y_velo = 0.0;
-
+            if collision_directions.contains(&"x") {
+                self.x_velo = -new_x_velo * 0.75;
+            } else {
+                self.x_velo = new_x_velo * 0.5;
+            }
+            if collision_directions.contains(&"y") {
+                self.y_velo = -new_y_velo * 0.75;
+            } else {
+                self.y_velo = new_y_velo * 0.5;
+            }
         }
     }
 
