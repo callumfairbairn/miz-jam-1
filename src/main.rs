@@ -34,7 +34,7 @@ use animation::{
     AnimationAction,
     AnimationState
 };
-use crate::level::{forest, Suit, get_suit};
+use crate::level::{Suit, get_suit, castle};
 
 pub struct Model {
     grid: Grid,
@@ -136,7 +136,7 @@ fn model(app: &App) -> Model {
         .build(device);
 
     let suit = get_suit();
-    let level = generate_level(forest());
+    let level = generate_level(castle());
     let grid = Grid::new_from_level(&level, &tile_tex.size(), device);
     let player_entity = EntityFactory::new(Entity::new_pawn());
 
