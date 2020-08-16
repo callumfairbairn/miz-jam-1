@@ -58,7 +58,7 @@ impl Model {
         self.env.mobs = active;
         
         for newly_dead in dead.iter_mut() {
-            newly_dead.animations.push_back(AnimationState::new_opacity_change(1.0, 0.0, 45));
+            newly_dead.animations.push_back(AnimationState::new_opacity_change(1.0, 0.0, 100));
         }
         self.env.inactive.append(&mut dead);
 
@@ -67,6 +67,15 @@ impl Model {
             if let Some(a) = mob.animations.front_mut() {
                 if a.tick() {
                     mob.animations.pop_front();
+                }
+            }
+        }
+
+        for inactive in self.env.inactive.iter_mut() {
+            // AI
+            if let Some(a) = inactive.animations.front_mut() {
+                if a.tick() {
+                    inactive.animations.pop_front();
                 }
             }
         }
@@ -181,24 +190,39 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     // DRAW MOBS
     for mob in &model.env.mobs {
-        /*let mut draw = 
-        if let Some(a) = mob.animations.front() {
+        let col = if let Some(a) = mob.animations.front() {
             match a.current_action {
-                Some(AnimationAction::Colour(_)) => draw,
-                Some(AnimationAction::Opacity(t)) => ),
-                None => draw
+                Some(AnimationAction::Colour(c)) => c,
+                Some(AnimationAction::Opacity(a)) => wgpu::Color{r: 1.0, g: 1.0, b: 1.0, a},
+                None => wgpu::Color::WHITE
             }
         } else {
-            draw
-        };*/
-
-        /*draw.alpha_blend(nannou::wgpu::BlendDescriptor{
-
-        }).*/
+            wgpu::Color::WHITE
+        };
 
         let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
             from_internal_to_offset(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
+            col
+        );
+        render_pass.set_bind_group(1, &bind_group_1, &[]);
+        render_pass.set_vertex_buffers(0, &[(&mob.tile.make_buffer(device), 0)]);
+        render_pass.draw(0..6, 0..1);
+    }
+
+    for mob in &model.env.inactive {
+        let col = if let Some(a) = mob.animations.front() {
+            match a.current_action {
+                Some(AnimationAction::Colour(c)) => c,
+                Some(AnimationAction::Opacity(a)) => wgpu::Color{r: 1.0, g: 1.0, b: 1.0, a},
+                None => wgpu::Color::WHITE
+            }
+        } else {
             wgpu::Color::WHITE
+        };
+
+        let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
+            from_internal_to_offset(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
+            col
         );
         render_pass.set_bind_group(1, &bind_group_1, &[]);
         render_pass.set_vertex_buffers(0, &[(&mob.tile.make_buffer(device), 0)]);

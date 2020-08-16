@@ -43,6 +43,13 @@ impl EnvironmentState {
     }
 
     pub fn mob_tick(&mut self) {
+        for mob in self.mobs.iter_mut() {
 
+            if let Some(a) = mob.animations.front_mut() {
+                if a.tick() {
+                    mob.animations.pop_front();
+                }
+            }
+        }
     }
 }

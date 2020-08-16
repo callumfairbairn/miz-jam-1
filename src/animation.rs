@@ -1,13 +1,13 @@
-use nannou::prelude::Srgba;
+use nannou::wgpu::Color;
 
 enum AnimationType {
     ColourChange{
-        from: Srgba,
-        to: Srgba
+        from: Color,
+        to: Color
     },
     OpacityChange{
-        from: f32,
-        to: f32
+        from: f64,
+        to: f64
     }
 }
 
@@ -21,7 +21,7 @@ pub struct AnimationState {
 }
 
 impl AnimationState {
-    pub fn new_colour_change(from: Srgba, to: Srgba, frames: usize) -> Self {
+    pub fn new_colour_change(from: Color, to: Color, frames: usize) -> Self {
         AnimationState {
             a_type: AnimationType::ColourChange{
                 from,
@@ -35,7 +35,7 @@ impl AnimationState {
         }
     }
 
-    pub fn new_opacity_change(from: f32, to: f32, frames: usize) -> Self {
+    pub fn new_opacity_change(from: f64, to: f64, frames: usize) -> Self {
         AnimationState {
             a_type: AnimationType::OpacityChange{
                 from,
@@ -53,8 +53,8 @@ impl AnimationState {
 // The result of an animation tick.
 // Tells "view" what to draw.
 pub enum AnimationAction {
-    Colour(Srgba),
-    Opacity(f32)
+    Colour(Color),
+    Opacity(f64)
 }
 
 impl AnimationState {
@@ -67,12 +67,12 @@ impl AnimationState {
 
         self.current_action = match self.a_type {
             AnimationType::ColourChange{from, to} => {
-                let weight = (self.frame_count as f32) / (self.end as f32);
+                let weight = (self.frame_count as f64) / (self.end as f64);
                 let out_col = blend_colour(from, to, weight);
                 Some(AnimationAction::Colour(out_col))
             },
             AnimationType::OpacityChange{from, to} => {
-                let weight = (self.frame_count as f32) / (self.end as f32);
+                let weight = (self.frame_count as f64) / (self.end as f64);
                 let out = (from * (1.0 - weight)) + (to * weight);
                 Some(AnimationAction::Opacity(out))
             }
@@ -83,16 +83,15 @@ impl AnimationState {
 }
 
 // Blend between a and b. If weight is 0, output is a, if weight is 1, output is b.
-fn blend_colour(colour_a: Srgba, colour_b: Srgba, weight: f32) -> Srgba {
-    let a_components = colour_a.into_components();
-    let b_components = colour_b.into_components();
-
+fn blend_colour(colour_a: Color, colour_b: Color, weight: f64) -> Color {
     let a_weight = 1.0 - weight;
     let b_weight = weight;
 
-    let r = (a_components.0 * a_weight) + (b_components.0 * b_weight);
-    let g = (a_components.1 * a_weight) + (b_components.1 * b_weight);
-    let b = (a_components.2 * a_weight) + (b_components.2 * b_weight);
-    let a = (a_components.3 * a_weight) + (b_components.3 * b_weight);
-    Srgba::from_components((r, g, b, a))
+    let r = (colour_a.r * a_weight) + (colour_b.r * b_weight);
+    let g = (colour_a.g * a_weight) + (colour_b.g * b_weight);
+    let b = (colour_a.b * a_weight) + (colour_b.b * b_weight);
+    let a = (colour_a.a * a_weight) + (colour_b.a * b_weight);
+    Color {
+        r, g, b, a
+    }
 }
