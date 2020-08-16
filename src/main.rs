@@ -22,7 +22,6 @@ use update::update;
 use level::{
     generate_level,
     generate_starting_position,
-    hearts,
     Level
 };
 use entity::{
@@ -35,11 +34,12 @@ use animation::{
     AnimationAction,
     AnimationState
 };
-use crate::level::spades;
+use crate::level::{forest, Suit, get_suit};
 
 pub struct Model {
     grid: Grid,
     level: Level,
+    suit: Suit,
 
     env: EnvironmentState,
 
@@ -135,7 +135,8 @@ fn model(app: &App) -> Model {
         .primitive_topology(wgpu::PrimitiveTopology::TriangleList)
         .build(device);
 
-    let level = generate_level(spades());
+    let suit = get_suit();
+    let level = generate_level(forest());
     let grid = Grid::new_from_level(&level, &tile_tex.size(), device);
     let player_entity = EntityFactory::new(Entity::new_pawn());
 
@@ -147,6 +148,7 @@ fn model(app: &App) -> Model {
     Model {
         grid,
         level,
+        suit,
 
         env,
 
@@ -163,7 +165,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     let mut encoder = frame.command_encoder();
     let mut render_pass = wgpu::RenderPassBuilder::new()
-        .color_attachment(frame.texture_view(), |colour| colour.clear_color(wgpu::Color::BLACK))
+        .color_attachment(frame.texture_view(), |colour| colour.clear_color(model.suit.colour))
         .begin(&mut encoder);
 
     render_pass.set_bind_group(0, &model.bind_group_0, &[]);

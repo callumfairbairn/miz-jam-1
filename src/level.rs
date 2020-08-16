@@ -1,7 +1,8 @@
 use super::tile::IPoint2;
 use rand::Rng;
-use crate::constants::{CHUNK_SIZE, LAYOUT_DIM, CHUNK_NUM, EROSION_TIMES, EROSION_CHANCE};
+use crate::constants::{CHUNK_SIZE, LAYOUT_DIM, CHUNK_NUM, EROSION_TIMES, EROSION_CHANCE, HEARTS_BACKGROUND_COLOUR, DIAMONDS_BACKGROUND_COLOUR, CLUBS_BACKGROUND_COLOUR, SPADES_BACKGROUND_COLOUR};
 use rand::rngs::ThreadRng;
+use nannou::wgpu;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Side {
@@ -9,6 +10,13 @@ pub enum Side {
     BOTTOM,
     LEFT,
     RIGHT,
+}
+
+pub enum Suits {
+    HEARTS,
+    DIAMONDS,
+    CLUBS,
+    SPADES
 }
 
 pub struct Level {
@@ -23,19 +31,37 @@ pub struct TileAttributes {
 }
 
 pub struct Suit {
+    pub colour: wgpu::Color,
+    pub suit: Suits,
+}
+
+pub fn get_suit() -> Suit {
+    let mut rng = rand::thread_rng();
+    let num = rng.gen_range(0, 4);
+    if num == 0 {
+        return Suit{ colour: HEARTS_BACKGROUND_COLOUR, suit: Suits::HEARTS }
+    } else if num == 1 {
+        return Suit{ colour: DIAMONDS_BACKGROUND_COLOUR, suit: Suits::DIAMONDS }
+    } else if num == 2 {
+        return Suit{ colour: CLUBS_BACKGROUND_COLOUR, suit: Suits::CLUBS }
+    }
+    Suit{ colour: SPADES_BACKGROUND_COLOUR, suit: Suits::SPADES }
+}
+
+pub struct Theme {
     pub floor_tiles: Vec<IPoint2>,
     pub wall_tiles: Vec<IPoint2>,
 }
 
-pub fn hearts() -> Suit {
-    Suit {
+pub fn forest() -> Theme {
+    Theme {
         floor_tiles: vec![IPoint2{x: 5, y: 0}, IPoint2{x: 6, y: 0}, IPoint2{x: 7, y: 0}],
         wall_tiles: vec![IPoint2{x: 0, y: 1}, IPoint2{x: 1, y: 1}, IPoint2{x: 2, y: 1}, IPoint2{x: 3, y: 1}],
     }
 }
 
-pub fn spades() -> Suit {
-    Suit {
+pub fn castle() -> Theme {
+    Theme {
         floor_tiles: vec![IPoint2{x: 2, y: 0}, IPoint2{x: 16, y: 0}, IPoint2{x: 17, y: 0}],
         wall_tiles: vec![IPoint2{x: 10, y: 17}, IPoint2{x: 10, y: 18}, IPoint2{x: 11, y: 18}]
     }
@@ -171,7 +197,7 @@ fn get_exposed_sides(x: usize, y: usize, floor: &Vec<Vec<Option<&str>>>) -> Vec<
     sides
 }
 
-pub fn generate_level(suit: Suit) -> Level {
+pub fn generate_level(theme: Theme) -> Level {
     let rng = rand::thread_rng();
     let mut grid = vec![vec![None; LAYOUT_DIM * CHUNK_SIZE]; LAYOUT_DIM * CHUNK_SIZE];
     let floor = generate_floor(rng);
@@ -180,9 +206,9 @@ pub fn generate_level(suit: Suit) -> Level {
         for (y, _) in grid[x].clone().iter().enumerate() {
             if floor[x][y].is_some() {
                 if floor[x][y].unwrap() == "floor" {
-                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.floor_tiles, rng), solid: false, exposed_sides: Vec::new() })
+                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&theme.floor_tiles, rng), solid: false, exposed_sides: Vec::new() })
                 } else if floor[x][y].unwrap() == "wall" {
-                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.wall_tiles, rng), solid: true, exposed_sides: get_exposed_sides(x, y, &floor) })
+                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&theme.wall_tiles, rng), solid: true, exposed_sides: get_exposed_sides(x, y, &floor) })
                 }
             }
         }
