@@ -1,6 +1,7 @@
 use bitflags::bitflags;
 use crate::level::Level;
-use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y};
+use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y, COLLISION_MULTIPLIER};
+use crate::level::Side::{LEFT, RIGHT, TOP, BOTTOM};
 
 bitflags! {
     #[derive(Default)]
@@ -162,11 +163,13 @@ impl MovementState {
         };
 
         let mut collision = false;
+        let mut collision_directions = Vec::new();
 
         for (y, row) in level.floor.iter().enumerate() {
             for (x, tile) in row.iter().enumerate() {
                 if tile.is_some() {
-                    if tile.as_ref().unwrap().solid {
+                    let tile = tile.as_ref().unwrap();
+                    if tile.solid {
                         let quad_size = TILE_RES * ZOOM;
                         let vertex_x = quad_size * (x as f32) - (WINDOW_RES_X / 2.0);
                         let vertex_y = quad_size * (y as f32) - (WINDOW_RES_Y / 2.0);
@@ -175,23 +178,34 @@ impl MovementState {
                             pos: (vertex_x, vertex_y),
                             size: (quad_size, quad_size),
                         };
+
                         if player_rect.collides_with(&tile_rect) {
                             collision = true;
+                            collision_directions.push(player_rect.get_nearest_wall(&tile_rect));
                         }
                     }
                 }
             }
         }
 
-        if !collision {
+        if collision {
+            if collision_directions.contains(&TOP) || collision_directions.contains(&BOTTOM) {
+                self.y_velo = -new_y_velo * COLLISION_MULTIPLIER;
+            } else {
+                self.y = new_y;
+                self.y_velo = new_y_velo;
+            }
+            if collision_directions.contains(&LEFT) || collision_directions.contains(&RIGHT) {
+                self.x_velo = -new_x_velo * COLLISION_MULTIPLIER;
+            } else {
+                self.x = new_x;
+                self.x_velo = new_x_velo;
+            }
+        } else {
             self.x = new_x;
             self.y = new_y;
             self.x_velo = new_x_velo;
             self.y_velo = new_y_velo;
-        } else {
-            self.x_velo = 0.0;
-            self.y_velo = 0.0;
-
         }
     }
 

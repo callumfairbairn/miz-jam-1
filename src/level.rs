@@ -3,6 +3,14 @@ use rand::Rng;
 use crate::constants::{CHUNK_SIZE, LAYOUT_DIM, CHUNK_NUM, EROSION_TIMES, EROSION_CHANCE};
 use rand::rngs::ThreadRng;
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Side {
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT,
+}
+
 pub struct Level {
     pub floor: Vec<Vec<Option<TileAttributes>>>,
 }
@@ -10,7 +18,8 @@ pub struct Level {
 #[derive(Clone)]
 pub struct TileAttributes {
     pub tile_coord: IPoint2,
-    pub solid: bool
+    pub solid: bool,
+    pub exposed_sides: Vec<Side>
 }
 
 pub struct Suit {
@@ -137,6 +146,31 @@ fn erode(floor: Vec<Vec<Option<&'static str>>>, mut rng: ThreadRng) -> Vec<Vec<O
     new_floor
 }
 
+fn get_exposed_sides(x: usize, y: usize, floor: &Vec<Vec<Option<&str>>>) -> Vec<Side> {
+    let mut sides = Vec::new();
+    if x > 0 && floor[x-1][y].is_some() {
+        if floor[x-1][y].unwrap() == "floor" {
+            sides.push(Side::BOTTOM)
+        }
+    }
+    if x < floor.len() - 1 && floor[x+1][y].is_some() {
+        if floor[x+1][y].unwrap() == "floor" {
+            sides.push(Side::TOP)
+        }
+    }
+    if y > 0 && floor[x][y-1].is_some() {
+        if floor[x][y-1].unwrap() == "floor" {
+            sides.push(Side::LEFT)
+        }
+    }
+    if y < floor[x].len() - 1 && floor[x][y+1].is_some() {
+        if floor[x][y+1].unwrap() == "floor" {
+            sides.push(Side::RIGHT)
+        }
+    }
+    sides
+}
+
 pub fn generate_level(suit: Suit) -> Level {
     let rng = rand::thread_rng();
     let mut grid = vec![vec![None; LAYOUT_DIM * CHUNK_SIZE]; LAYOUT_DIM * CHUNK_SIZE];
@@ -146,9 +180,9 @@ pub fn generate_level(suit: Suit) -> Level {
         for (y, _) in grid[x].clone().iter().enumerate() {
             if floor[x][y].is_some() {
                 if floor[x][y].unwrap() == "floor" {
-                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.floor_tiles, rng), solid: false })
+                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.floor_tiles, rng), solid: false, exposed_sides: Vec::new() })
                 } else if floor[x][y].unwrap() == "wall" {
-                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.wall_tiles, rng), solid: true })
+                    grid[x][y] = Some(TileAttributes { tile_coord: get_tile_coord(&suit.wall_tiles, rng), solid: true, exposed_sides: get_exposed_sides(x, y, &floor) })
                 }
             }
         }
