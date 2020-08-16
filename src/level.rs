@@ -203,7 +203,6 @@ pub fn generate_starting_position(level: &Level) -> (f64, f64) {
         let y = rng.gen_range(0, level.floor.len());
         let x = rng.gen_range(0, level.floor[y].len());
         if level.floor[y][x].is_some() && !level.floor[y][x].as_ref().unwrap().solid {
-            println!("Spawning at {}, {}", x, y);
             return (x as f64, y as f64);
         }
     }

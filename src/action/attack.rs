@@ -9,14 +9,14 @@ pub fn quick_attack(player: &mut InstanceState, mobs: &mut [Instance]) {
 
     let player_rect = crate::rect::Rect{
         pos: player.pos,
-        size: (32.0, 32.0)
+        size: (1.0, 1.0)
     };
 
     for mob in mobs.iter_mut() {
         if mob.state.is_active() {
             let mob_rect = crate::rect::Rect{
                 pos: (mob.movement.x_pos(), mob.movement.y_pos()),
-                size: (32.0, 32.0)
+                size: (1.0, 1.0)
             };
         
             if player_rect.collides_with(&mob_rect) {
