@@ -199,23 +199,18 @@ impl MovementState {
             }
         }
 
-        if !collision {
-            self.x = new_x;
-            self.y = new_y;
-            self.x_velo = new_x_velo;
-            self.y_velo = new_y_velo;
-        } else {
-            if collision_directions.contains(&"x") {
-                self.x_velo = -new_x_velo * 0.75;
-            } else {
-                self.x_velo = new_x_velo * 0.5;
-            }
-            if collision_directions.contains(&"y") {
-                self.y_velo = -new_y_velo * 0.75;
-            } else {
-                self.y_velo = new_y_velo * 0.5;
-            }
-        }
+    if collision_directions.contains(&"x") {
+        self.x_velo = -new_x_velo * 0.5;
+    } else {
+        self.x_velo = new_x_velo;
+        self.x = new_x;
+    }
+    if collision_directions.contains(&"y") {
+        self.y_velo = -new_y_velo * 0.5;
+    } else {
+        self.y_velo = new_y_velo;
+        self.y = new_y;
+    }
     }
 
     pub fn x_pos(&self) -> f32 {
