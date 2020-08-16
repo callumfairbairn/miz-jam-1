@@ -12,4 +12,4 @@ pub(crate) const CHUNK_NUM: usize = 8;
 pub(crate) const EROSION_CHANCE: f64 = 0.25;
 pub(crate) const EROSION_TIMES: i32 = 2;
 
-pub(crate) const COLLISION_MULTIPLIER: f64 = 0.75;
+pub(crate) const COLLISION_MULTIPLIER: f64 = 0.2;

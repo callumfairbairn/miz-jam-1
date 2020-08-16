@@ -1,6 +1,6 @@
 use bitflags::bitflags;
 use crate::level::Level;
-use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y, COLLISION_MULTIPLIER};
+use crate::constants::{COLLISION_MULTIPLIER};
 use crate::level::Side::{LEFT, RIGHT, TOP, BOTTOM};
 
 bitflags! {
