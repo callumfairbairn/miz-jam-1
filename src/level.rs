@@ -5,8 +5,8 @@ use rand::rngs::ThreadRng;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Side {
-    UP,
-    DOWN,
+    TOP,
+    BOTTOM,
     LEFT,
     RIGHT,
 }
@@ -150,12 +150,12 @@ fn get_exposed_sides(x: usize, y: usize, floor: &Vec<Vec<Option<&str>>>) -> Vec<
     let mut sides = Vec::new();
     if x > 0 && floor[x-1][y].is_some() {
         if floor[x-1][y].unwrap() == "floor" {
-            sides.push(Side::DOWN)
+            sides.push(Side::BOTTOM)
         }
     }
     if x < floor.len() - 1 && floor[x+1][y].is_some() {
         if floor[x+1][y].unwrap() == "floor" {
-            sides.push(Side::UP)
+            sides.push(Side::TOP)
         }
     }
     if y > 0 && floor[x][y-1].is_some() {
