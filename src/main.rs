@@ -135,7 +135,7 @@ fn model(app: &App) -> Model {
         .build(device);
 
     let level = generate_level(hearts());
-    let grid = Grid::new_from_level(&level, &tile_tex.size(), device);
+    let grid = Grid::new_from_level(device, &level, &tile_tex.size(), None);
     let player_entity = EntityFactory::new(Entity::new_pawn());
 
     let start_pos = generate_starting_position(&level);
@@ -173,7 +173,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
     // DRAW BACKGROUND
     let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
         (-s_x, -s_y),
-        wgpu::Color::WHITE
+        wgpu::Color::WHITE,
+        model.grid.override_color.unwrap_or(wgpu::Color::TRANSPARENT)
     );
     render_pass.set_bind_group(1, &bind_group_1, &[]);
     render_pass.set_vertex_buffers(0, &[(&model.grid.vertices, 0)]);
@@ -182,7 +183,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
     // DRAW PLAYER
     let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
         (0.0, 0.0),
-        wgpu::Color::WHITE
+        wgpu::Color::WHITE,
+        wgpu::Color::TRANSPARENT
     );
     render_pass.set_bind_group(1, &bind_group_1, &[]);
     render_pass.set_vertex_buffers(0, &[(&model.env.player.tile.make_buffer(device), 0)]);
@@ -202,7 +204,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
         let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
             from_internal_to_offset(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
-            col
+            col,
+            wgpu::Color::TRANSPARENT
         );
         render_pass.set_bind_group(1, &bind_group_1, &[]);
         render_pass.set_vertex_buffers(0, &[(&mob.tile.make_buffer(device), 0)]);
@@ -222,7 +225,8 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
         let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
             from_internal_to_offset(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
-            col
+            col,
+            wgpu::Color::TRANSPARENT
         );
         render_pass.set_bind_group(1, &bind_group_1, &[]);
         render_pass.set_vertex_buffers(0, &[(&mob.tile.make_buffer(device), 0)]);
@@ -230,12 +234,15 @@ fn view(app: &App, model: &Model, frame: Frame) {
     }
 }
 
-fn create_bind_group_1(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, transform: (f32, f32), color: wgpu::Color) -> wgpu::BindGroup {
+fn create_bind_group_1(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, transform: (f32, f32), blend_color: wgpu::Color, override_color: wgpu::Color) -> wgpu::BindGroup {
     let transform_buffer_data = [transform.0, transform.1];
     let transform_buffer_bytes: &[u8] = bytemuck::cast_slice(&transform_buffer_data);
     let transform_buffer = device.create_buffer_mapped(transform_buffer_bytes.len(), wgpu::BufferUsage::UNIFORM).fill_from_slice(transform_buffer_bytes);
 
-    let color_buffer_data = [color.r as f32, color.g as f32, color.b as f32, color.a as f32];
+    let color_buffer_data = [
+        blend_color.r as f32, blend_color.g as f32, blend_color.b as f32, blend_color.a as f32,
+        override_color.r as f32, override_color.g as f32, override_color.b as f32, override_color.a as f32
+    ];
     let color_buffer_bytes: &[u8] = bytemuck::cast_slice(&color_buffer_data);
     let color_buffer = device.create_buffer_mapped(color_buffer_bytes.len(), wgpu::BufferUsage::UNIFORM).fill_from_slice(color_buffer_bytes);
 

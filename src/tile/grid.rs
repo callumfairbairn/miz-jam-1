@@ -8,11 +8,12 @@ use super::Vertex;
 
 pub struct Grid {
     pub num_vertices: u32,
-    pub vertices: nannou::wgpu::Buffer
+    pub vertices: nannou::wgpu::Buffer,
+    pub override_color: Option<nannou::wgpu::Color>
 }
 
 impl Grid {
-    pub fn new_from_level(level: &Level, texture_size: &[u32; 2], device: &nannou::wgpu::Device) -> Self {
+    pub fn new_from_level(device: &nannou::wgpu::Device, level: &Level, texture_size: &[u32; 2], override_color: Option<nannou::wgpu::Color>) -> Self {
         let mut grid = Vec::new();
         let quad_size_x = 2.0 * (TILE_RES * ZOOM) / WINDOW_RES_X;
         let quad_size_y = 2.0 * (TILE_RES * ZOOM) / WINDOW_RES_Y;
@@ -66,7 +67,8 @@ impl Grid {
 
         Self {
             num_vertices: grid.len() as u32,
-            vertices: vertex_buffer
+            vertices: vertex_buffer,
+            override_color: override_color,
         }
     }
 }
