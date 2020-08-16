@@ -163,7 +163,7 @@ impl MovementState {
         };
 
         let mut collision = false;
-        let mut collision_direction = RIGHT;
+        let mut collision_directions = Vec::new();
 
         for (y, row) in level.floor.iter().enumerate() {
             for (x, tile) in row.iter().enumerate() {
@@ -181,7 +181,7 @@ impl MovementState {
 
                         if player_rect.collides_with(&tile_rect) {
                             collision = true;
-                            collision_direction = player_rect.get_nearest_wall(&tile_rect)
+                            collision_directions.push(player_rect.get_nearest_wall(&tile_rect));
                         }
                     }
                 }
@@ -189,22 +189,17 @@ impl MovementState {
         }
 
         if collision {
-            if collision_direction == TOP {
-                self.x = new_x;
-                self.x_velo = new_x_velo * COLLISION_MULTIPLIER;
+            if collision_directions.contains(&TOP) || collision_directions.contains(&BOTTOM) {
                 self.y_velo = -new_y_velo * COLLISION_MULTIPLIER;
-            } else if collision_direction == BOTTOM {
-                self.x = new_x;
-                self.x_velo = new_x_velo * COLLISION_MULTIPLIER;
-                self.y_velo = -new_y_velo * COLLISION_MULTIPLIER;
-            } else if collision_direction == LEFT {
-                self.y = new_y;
-                self.y_velo = new_y_velo * COLLISION_MULTIPLIER;
-                self.x_velo = -new_x_velo * COLLISION_MULTIPLIER;
             } else {
                 self.y = new_y;
-                self.y_velo = new_y_velo * COLLISION_MULTIPLIER;
+                self.y_velo = new_y_velo;
+            }
+            if collision_directions.contains(&LEFT) || collision_directions.contains(&RIGHT) {
                 self.x_velo = -new_x_velo * COLLISION_MULTIPLIER;
+            } else {
+                self.x = new_x;
+                self.x_velo = new_x_velo;
             }
         } else {
             self.x = new_x;
