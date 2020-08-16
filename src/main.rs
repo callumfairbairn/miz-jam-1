@@ -28,12 +28,10 @@ use level::{
 use entity::{
     Entity,
     EntityFactory,
-    Instance
 };
 use environment::EnvironmentState;
 use animation::{
     AnimationAction,
-    AnimationState
 };
 
 pub struct Model {
@@ -53,32 +51,7 @@ impl Model {
     pub fn tick(&mut self) {
         self.env.player_tick(&self.level);
 
-        // TODO: move the below into env.mob_tick
-        let (active, mut dead): (Vec<Instance>, Vec<Instance>) = self.env.mobs.drain(..).partition(|mob| mob.state.is_active());
-        self.env.mobs = active;
-        
-        for newly_dead in dead.iter_mut() {
-            newly_dead.animations.push_back(AnimationState::new_opacity_change(1.0, 0.0, 100));
-        }
-        self.env.inactive.append(&mut dead);
-
-        for mob in self.env.mobs.iter_mut() {
-            // AI
-            if let Some(a) = mob.animations.front_mut() {
-                if a.tick() {
-                    mob.animations.pop_front();
-                }
-            }
-        }
-
-        for inactive in self.env.inactive.iter_mut() {
-            // AI
-            if let Some(a) = inactive.animations.front_mut() {
-                if a.tick() {
-                    inactive.animations.pop_front();
-                }
-            }
-        }
+        self.env.mob_tick();
     }
 }
 
@@ -157,77 +130,90 @@ fn model(app: &App) -> Model {
 }
 
 fn view(app: &App, model: &Model, frame: Frame) {
-    let window = app.window(model.w_id).unwrap();
-    let device = window.swap_chain_device();
+    {
+        let window = app.window(model.w_id).unwrap();
+        let device = window.swap_chain_device();
 
-    let mut encoder = frame.command_encoder();
-    let mut render_pass = wgpu::RenderPassBuilder::new()
-        .color_attachment(frame.texture_view(), |colour| colour.clear_color(wgpu::Color::BLACK))
-        .begin(&mut encoder);
+        let mut encoder = frame.command_encoder();
+        let mut render_pass = wgpu::RenderPassBuilder::new()
+            .color_attachment(frame.texture_view(), |colour| colour.clear_color(wgpu::Color::BLACK))
+            .begin(&mut encoder);
 
-    render_pass.set_bind_group(0, &model.bind_group_0, &[]);
-    render_pass.set_pipeline(&model.render_pipeline);
+        render_pass.set_scissor_rect(0, 0, (WINDOW_RES_X as u32) * 2, ((WINDOW_RES_Y as u32) * 2) - 120);
+        render_pass.set_bind_group(0, &model.bind_group_0, &[]);
+        render_pass.set_pipeline(&model.render_pipeline);
 
-    let (s_x, s_y) = from_internal_to_screen(model.env.player.movement.x_pos(), model.env.player.movement.y_pos());
+        let (s_x, s_y) = from_internal_to_screen(model.env.player.movement.x_pos(), model.env.player.movement.y_pos());
 
-    // DRAW BACKGROUND
-    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
-        (-s_x, -s_y),
-        wgpu::Color::WHITE
-    );
-    render_pass.set_bind_group(1, &bind_group_1, &[]);
-    render_pass.set_vertex_buffers(0, &[(&model.grid.vertices, 0)]);
-    render_pass.draw(0..model.grid.num_vertices, 0..1);
-
-    // DRAW PLAYER
-    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
-        (0.0, 0.0),
-        wgpu::Color::WHITE
-    );
-    render_pass.set_bind_group(1, &bind_group_1, &[]);
-    render_pass.set_vertex_buffers(0, &[(&model.env.player.tile.make_buffer(device), 0)]);
-    render_pass.draw(0..6, 0..1);
-
-    // DRAW MOBS
-    for mob in &model.env.mobs {
-        let col = if let Some(a) = mob.animations.front() {
-            match a.current_action {
-                Some(AnimationAction::Colour(c)) => c,
-                Some(AnimationAction::Opacity(a)) => wgpu::Color{r: 1.0, g: 1.0, b: 1.0, a},
-                None => wgpu::Color::WHITE
-            }
-        } else {
-            wgpu::Color::WHITE
-        };
-
+        // DRAW BACKGROUND
         let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
-            from_internal_to_offset(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
-            col
+            (-s_x, -s_y),
+            wgpu::Color::WHITE
         );
         render_pass.set_bind_group(1, &bind_group_1, &[]);
-        render_pass.set_vertex_buffers(0, &[(&mob.tile.make_buffer(device), 0)]);
-        render_pass.draw(0..6, 0..1);
-    }
+        render_pass.set_vertex_buffers(0, &[(&model.grid.vertices, 0)]);
+        render_pass.draw(0..model.grid.num_vertices, 0..1);
 
-    for mob in &model.env.inactive {
-        let col = if let Some(a) = mob.animations.front() {
-            match a.current_action {
-                Some(AnimationAction::Colour(c)) => c,
-                Some(AnimationAction::Opacity(a)) => wgpu::Color{r: 1.0, g: 1.0, b: 1.0, a},
-                None => wgpu::Color::WHITE
-            }
-        } else {
-            wgpu::Color::WHITE
-        };
-
+        // DRAW PLAYER
         let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
-            from_internal_to_offset(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
-            col
+            (0.0, 0.0),
+            wgpu::Color::WHITE
         );
         render_pass.set_bind_group(1, &bind_group_1, &[]);
-        render_pass.set_vertex_buffers(0, &[(&mob.tile.make_buffer(device), 0)]);
+        render_pass.set_vertex_buffers(0, &[(&model.env.player.tile.make_buffer(device), 0)]);
         render_pass.draw(0..6, 0..1);
+
+        // DRAW MOBS
+        for mob in &model.env.mobs {
+            let col = if let Some(a) = mob.animations.front() {
+                match a.current_action {
+                    Some(AnimationAction::Colour(c)) => c,
+                    Some(AnimationAction::Opacity(a)) => wgpu::Color{r: 1.0, g: 1.0, b: 1.0, a},
+                    None => wgpu::Color::WHITE
+                }
+            } else {
+                wgpu::Color::WHITE
+            };
+
+            let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
+                from_internal_to_offset(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
+                col
+            );
+            render_pass.set_bind_group(1, &bind_group_1, &[]);
+            render_pass.set_vertex_buffers(0, &[(&mob.tile.make_buffer(device), 0)]);
+            render_pass.draw(0..6, 0..1);
+        }
+
+        for mob in &model.env.inactive {
+            let col = if let Some(a) = mob.animations.front() {
+                match a.current_action {
+                    Some(AnimationAction::Colour(c)) => c,
+                    Some(AnimationAction::Opacity(a)) => wgpu::Color{r: 1.0, g: 1.0, b: 1.0, a},
+                    None => wgpu::Color::WHITE
+                }
+            } else {
+                wgpu::Color::WHITE
+            };
+
+            let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
+                from_internal_to_offset(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
+                col
+            );
+            render_pass.set_bind_group(1, &bind_group_1, &[]);
+            render_pass.set_vertex_buffers(0, &[(&mob.tile.make_buffer(device), 0)]);
+            render_pass.draw(0..6, 0..1);
+        }
     }
+
+    draw_hud(app, model, frame);
+}
+
+fn draw_hud(app: &App, model: &Model, frame: Frame) {
+    let draw = app.draw();
+    draw.text("HP:").color(WHITE).font_size(24).x_y(50.0 - WINDOW_RES_X / 2.0, 35.0 - WINDOW_RES_Y / 2.0);
+    draw.text(format!("{} / {}", model.env.player.state.current_hp, model.env.player.state.max_hp).as_str())
+        .color(WHITE).font_size(24).x_y(130.0 - WINDOW_RES_X / 2.0, 35.0 - WINDOW_RES_Y / 2.0);
+    draw.to_frame(app, &frame).unwrap();
 }
 
 fn create_bind_group_1(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, transform: (f32, f32), color: wgpu::Color) -> wgpu::BindGroup {

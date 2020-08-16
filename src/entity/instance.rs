@@ -18,8 +18,8 @@ pub struct InstanceState<'a> {
 
 #[derive(Clone)]
 pub struct InstanceAttributes {
-    max_hp: isize,
-    current_hp: isize,
+    pub max_hp: isize,
+    pub current_hp: isize,
 
     is_active: bool,
 }

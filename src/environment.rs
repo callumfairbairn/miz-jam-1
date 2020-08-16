@@ -1,4 +1,5 @@
 use crate::{
+    animation::AnimationState,
     entity::*,
     action::ActionType,
     tile::Tile,
@@ -43,11 +44,28 @@ impl EnvironmentState {
     }
 
     pub fn mob_tick(&mut self) {
-        for mob in self.mobs.iter_mut() {
+        let (active, mut dead): (Vec<Instance>, Vec<Instance>) = self.mobs.drain(..).partition(|mob| mob.state.is_active());
+        self.mobs = active;
+        
+        for newly_dead in dead.iter_mut() {
+            newly_dead.animations.push_back(AnimationState::new_opacity_change(1.0, 0.0, 100));
+        }
+        self.inactive.append(&mut dead);
 
+        for mob in self.mobs.iter_mut() {
+            // AI
             if let Some(a) = mob.animations.front_mut() {
                 if a.tick() {
                     mob.animations.pop_front();
+                }
+            }
+        }
+
+        for inactive in self.inactive.iter_mut() {
+            // AI
+            if let Some(a) = inactive.animations.front_mut() {
+                if a.tick() {
+                    inactive.animations.pop_front();
                 }
             }
         }
