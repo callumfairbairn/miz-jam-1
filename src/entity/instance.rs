@@ -3,10 +3,12 @@ use super::movement::{MovementState, Direction};
 use crate::{
     action::ActiveActionState,
     action::ActionType,
+    animation::AnimationState,
     tile::Tile
 };
 
 use std::rc::Rc;
+use std::collections::VecDeque;
 
 pub struct InstanceState<'a> {
     pub pos: (f32, f32),
@@ -15,16 +17,40 @@ pub struct InstanceState<'a> {
 
 #[derive(Clone)]
 pub struct InstanceAttributes {
-    pub max_hp: usize,
-    pub current_hp: usize,
+    max_hp: isize,
+    current_hp: isize,
+
+    is_active: bool,
 }
 
-#[derive(Clone)]
+impl InstanceAttributes {
+    pub fn new(hp: isize) -> Self {
+        Self {
+            max_hp: hp,
+            current_hp: hp,
+
+            is_active: true,
+        }
+    }
+
+    pub fn modify_hp(&mut self, delta: isize) {
+        self.current_hp += delta;
+        if self.current_hp <= 0 {
+            self.is_active = false;
+        }
+    }
+
+    pub fn is_active(&self) -> bool {
+        self.is_active
+    }
+}
+
 pub struct Instance {
     class: Rc<Entity>,
     action: Option<ActiveActionState>,
     pub tile: Tile,
     pub movement: MovementState,
+    pub animations: VecDeque<AnimationState>,
 
     pub state: InstanceAttributes,
 }
@@ -36,6 +62,7 @@ impl Instance {
             action: None,
             tile: tile,
             movement: MovementState::new(at_coords),
+            animations: VecDeque::new(),
 
             state: from_entity.initial_state.clone()
         }
@@ -43,23 +70,27 @@ impl Instance {
 
     // TODO: grid and check
     pub fn movement_tick(&mut self, dirs: Direction) {
-        self.movement.tick(self.class.movement_attrs(), dirs);
+        if self.state.is_active() {
+            self.movement.tick(self.class.movement_attrs(), dirs);
+        }
     }
 
     pub fn action_tick(&mut self, new_action: Option<ActionType>, mobs: &mut [Instance]) {
-        if let Some(action) = new_action {
-            if self.action.as_ref().map(|a| a.cancel()).unwrap_or(true) {
-                self.action = self.class.actions.get(&action).map(|attrs| ActiveActionState::new(attrs));
+        if self.state.is_active() {
+            if let Some(action) = new_action {
+                if self.action.as_ref().map(|a| a.cancel()).unwrap_or(true) {
+                    self.action = self.class.actions.get(&action).map(|attrs| ActiveActionState::new(attrs));
+                }
             }
-        }
-
-        if let Some(action) = &mut self.action {
-            let mut state = InstanceState {
-                pos: (self.movement.x_pos(), self.movement.y_pos()),
-                attrs: &mut self.state
-            };
-            if action.tick(&mut state, mobs) {
-                self.action = None;
+    
+            if let Some(action) = &mut self.action {
+                let mut state = InstanceState {
+                    pos: (self.movement.x_pos(), self.movement.y_pos()),
+                    attrs: &mut self.state
+                };
+                if action.tick(&mut state, mobs) {
+                    self.action = None;
+                }
             }
         }
     }

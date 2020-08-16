@@ -50,10 +50,7 @@ impl Entity {
 
             actions: actions_map,
 
-            initial_state: InstanceAttributes {
-                max_hp: 10,
-                current_hp: 10,
-            }
+            initial_state: InstanceAttributes::new(10)
         }
     }
 
@@ -67,10 +64,7 @@ impl Entity {
 
             actions: HashMap::new(),
 
-            initial_state: InstanceAttributes {
-                max_hp: 3,
-                current_hp: 3,
-            }
+            initial_state: InstanceAttributes::new(3)
         }
     }
 }

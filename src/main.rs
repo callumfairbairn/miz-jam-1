@@ -8,6 +8,7 @@ mod entity;
 mod action;
 mod environment;
 mod rect;
+mod animation;
 
 use nannou::{
     prelude::*,
@@ -25,9 +26,14 @@ use level::{
 };
 use entity::{
     Entity,
-    EntityFactory
+    EntityFactory,
+    Instance
 };
 use environment::EnvironmentState;
+use animation::{
+    AnimationAction,
+    AnimationState
+};
 
 pub struct Model {
     grid: Grid,
@@ -38,11 +44,25 @@ pub struct Model {
 
 impl Model {
     pub fn tick(&mut self) {
-        self.env.player.movement_tick(self.env.dirs);
+        self.env.player_tick();
 
-        self.env.player.action_tick(std::mem::replace(&mut self.env.player_action, None), &mut self.env.mobs);
+        // TODO: move the below into env.mob_tick
+        let (active, mut dead): (Vec<Instance>, Vec<Instance>) = self.env.mobs.drain(..).partition(|mob| mob.state.is_active());
+        self.env.mobs = active;
+        
+        for newly_dead in dead.iter_mut() {
+            newly_dead.animations.push_back(AnimationState::new_opacity_change(1.0, 0.0, 45));
+        }
+        self.env.inactive.append(&mut dead);
 
-        self.env.mobs = self.env.mobs.iter().filter(|mob| mob.state.current_hp > 0).cloned().collect::<Vec<_>>();
+        for mob in self.env.mobs.iter_mut() {
+            // AI
+            if let Some(a) = mob.animations.front_mut() {
+                if a.tick() {
+                    mob.animations.pop_front();
+                }
+            }
+        }
     }
 }
 
@@ -91,9 +111,27 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
     // Draw mobs...
     for mob in &model.env.mobs {
+        /*let mut draw = 
+        if let Some(a) = mob.animations.front() {
+            match a.current_action {
+                Some(AnimationAction::Colour(_)) => draw,
+                Some(AnimationAction::Opacity(t)) => ),
+                None => draw
+            }
+        } else {
+            draw
+        };*/
+
+        /*draw.alpha_blend(nannou::wgpu::BlendDescriptor{
+
+        }).*/
+
         draw.sampler(sampler_desc())
-        .translate(nannou::geom::Vector3::new(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos(), 0.0))
-        .mesh().tris_textured(&model.tile_tex, mob.tile.vertices.clone());
+            .translate(nannou::geom::Vector3::new(
+                mob.movement.x_pos() - model.env.player.movement.x_pos(),
+                mob.movement.y_pos() - model.env.player.movement.y_pos(),
+                0.0
+            )).mesh().tris_textured(&model.tile_tex, mob.tile.vertices.clone());
     }
 
     // Finish

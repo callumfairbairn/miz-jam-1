@@ -46,7 +46,7 @@ impl ActiveActionState {
         }
     }
 
-    // Returns true if it cancelled OK.
+    // Returns true if it can be cancelled.
     pub fn cancel(&self) -> bool {
         match self.state {
             ActionState::WindUp => true,
