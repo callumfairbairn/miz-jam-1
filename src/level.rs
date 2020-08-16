@@ -132,19 +132,52 @@ fn generate_floor(rng: ThreadRng) -> Vec<Vec<Option<&'static str>>> {
         }
     }
 
-    floor = erode(floor, rng);
+    floor = erode(&floor, rng);
 
+    floor = add_walls(&floor);
+
+    remove_single_islands(&floor)
+}
+
+fn is_surrounded_by_walls(x: usize, y: usize, floor: &Vec<Vec<Option<&'static str>>>) -> bool {
+    if floor[x - 1][y].as_ref().unwrap() == &"wall"
+    && floor[x + 1][y].as_ref().unwrap() == &"wall"
+    && floor[x][y - 1].as_ref().unwrap() == &"wall"
+    && floor[x][y + 1].as_ref().unwrap() == &"wall" {
+        return true
+    }
+    false
+}
+
+fn remove_single_islands(floor: &Vec<Vec<Option<&'static str>>>) -> Vec<Vec<Option<&'static str>>> {
+    let mut new_floor = floor.clone();
     for (x, row) in floor.clone().iter().enumerate() {
         for (y, _) in row.iter().enumerate() {
             if floor[x][y].is_some() {
-                if  is_on_edge(x, y, &floor) {
-                    floor[x][y] = Some("wall");
+                let tile = floor[x][y].as_ref().unwrap();
+                if tile == &"floor" {
+                    if is_surrounded_by_walls(x, y, floor) {
+                        new_floor[x][y] = Some("wall");
+                    }
                 }
             }
         }
     }
+    new_floor
+}
 
-    floor
+fn add_walls(floor: &Vec<Vec<Option<&'static str>>>) -> Vec<Vec<Option<&'static str>>> {
+    let mut new_floor = floor.clone();
+    for (x, row) in floor.clone().iter().enumerate() {
+        for (y, _) in row.iter().enumerate() {
+            if floor[x][y].is_some() {
+                if  is_on_edge(x, y, &floor) {
+                    new_floor[x][y] = Some("wall");
+                }
+            }
+        }
+    }
+    new_floor
 }
 
 fn is_on_edge(x: usize, y: usize, floor: &Vec<Vec<Option<&'static str>>>) -> bool {
@@ -155,7 +188,7 @@ fn is_on_edge(x: usize, y: usize, floor: &Vec<Vec<Option<&'static str>>>) -> boo
         || floor[x][y - 1].is_none()
 }
 
-fn erode(floor: Vec<Vec<Option<&'static str>>>, mut rng: ThreadRng) -> Vec<Vec<Option<&'static str>>> {
+fn erode(floor: &Vec<Vec<Option<&'static str>>>, mut rng: ThreadRng) -> Vec<Vec<Option<&'static str>>> {
     let mut new_floor = floor.clone();
     for _ in 0..EROSION_TIMES {
         for (x, _) in new_floor.clone().iter_mut().enumerate() {
