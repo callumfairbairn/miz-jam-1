@@ -1,4 +1,6 @@
 use bitflags::bitflags;
+use crate::level::Level;
+use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y};
 
 bitflags! {
     #[derive(Default)]
@@ -70,7 +72,7 @@ impl MovementState {
         }
     }
 
-    pub fn tick(&mut self, attrs: &MovementAttributes, apply_direction: Direction) {
+    pub fn tick(&mut self, attrs: &MovementAttributes, apply_direction: Direction, level: &Level) {
         let (x_move, y_move) = apply_direction.reduce();
 
         let (max_speed_x, max_speed_y) = match (x_move, y_move) {
@@ -149,10 +151,48 @@ impl MovementState {
             },
         };
 
-        self.x += x_velo;
-        self.y += y_velo;
-        self.x_velo = x_velo;
-        self.y_velo = y_velo;
+        let new_x = self.x + x_velo;
+        let new_y = self.y + y_velo;
+        let new_x_velo = x_velo;
+        let new_y_velo = y_velo;
+
+        let player_rect = crate::rect::Rect{
+            pos: (new_x as f32, new_y as f32),
+            size: (32.0, 32.0)
+        };
+
+        let mut collision = false;
+
+        for (y, row) in level.floor.iter().enumerate() {
+            for (x, tile) in row.iter().enumerate() {
+                if tile.is_some() {
+                    if tile.as_ref().unwrap().solid {
+                        let quad_size = TILE_RES * ZOOM;
+                        let vertex_x = quad_size * (x as f32) - (WINDOW_RES_X / 2.0);
+                        let vertex_y = quad_size * (y as f32) - (WINDOW_RES_Y / 2.0);
+
+                        let tile_rect = crate::rect::Rect {
+                            pos: (vertex_x, vertex_y),
+                            size: (quad_size, quad_size),
+                        };
+                        if player_rect.collides_with(&tile_rect) {
+                            collision = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        if !collision {
+            self.x = new_x;
+            self.y = new_y;
+            self.x_velo = new_x_velo;
+            self.y_velo = new_y_velo;
+        } else {
+            self.x_velo = 0.0;
+            self.y_velo = 0.0;
+
+        }
     }
 
     pub fn x_pos(&self) -> f32 {

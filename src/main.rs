@@ -22,7 +22,8 @@ use update::update;
 use level::{
     generate_level,
     generate_starting_position,
-    hearts
+    hearts,
+    Level
 };
 use entity::{
     Entity,
@@ -38,13 +39,14 @@ use animation::{
 pub struct Model {
     grid: Grid,
     tile_tex: nannou::wgpu::Texture,
+    level: Level,
 
     env: EnvironmentState,
 }
 
 impl Model {
     pub fn tick(&mut self) {
-        self.env.player_tick();
+        self.env.player_tick(&self.level);
 
         // TODO: move the below into env.mob_tick
         let (active, mut dead): (Vec<Instance>, Vec<Instance>) = self.env.mobs.drain(..).partition(|mob| mob.state.is_active());
@@ -90,6 +92,7 @@ fn model(app: &App) -> Model {
     Model {
         grid,
         tile_tex,
+        level,
 
         env
     }

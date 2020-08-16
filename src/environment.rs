@@ -31,8 +31,18 @@ impl EnvironmentState {
         }
     }
 
-    pub fn player_tick(&mut self) {
-        self.player.movement_tick(self.dirs);
+    pub fn player_tick(&mut self, level: &Level) {
+        self.player.movement_tick(self.dirs, level);
         self.player.action_tick(std::mem::replace(&mut self.player_action, None), &mut self.mobs);
+
+        if let Some(a) = self.player.animations.front_mut() {
+            if a.tick() {
+                self.player.animations.pop_front();
+            }
+        }
+    }
+
+    pub fn mob_tick(&mut self) {
+
     }
 }

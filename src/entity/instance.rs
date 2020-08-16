@@ -9,6 +9,7 @@ use crate::{
 
 use std::rc::Rc;
 use std::collections::VecDeque;
+use crate::level::Level;
 
 pub struct InstanceState<'a> {
     pub pos: (f32, f32),
@@ -69,9 +70,9 @@ impl Instance {
     }
 
     // TODO: grid and check
-    pub fn movement_tick(&mut self, dirs: Direction) {
+    pub fn movement_tick(&mut self, dirs: Direction, level: &Level) {
         if self.state.is_active() {
-            self.movement.tick(self.class.movement_attrs(), dirs);
+            self.movement.tick(self.class.movement_attrs(), dirs, level);
         }
     }
 
