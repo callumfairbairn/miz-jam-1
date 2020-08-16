@@ -44,7 +44,6 @@ pub struct Model {
 
     // graphics
     w_id: nannou::winit::window::WindowId,
-    tile_tex: wgpu::Texture,
     render_pipeline: wgpu::RenderPipeline,
     bind_group_0: wgpu::BindGroup,
     bind_group_layout_1: wgpu::BindGroupLayout,
@@ -110,7 +109,7 @@ fn model(app: &App) -> Model {
         .build(device, &bind_group_layout_0);
     let bind_group_layout_1 = wgpu::BindGroupLayoutBuilder::new()
         .uniform_buffer(wgpu::ShaderStage::VERTEX, false)
-        //.uniform_buffer(wgpu::ShaderStage::FRAGMENT, true)
+        .uniform_buffer(wgpu::ShaderStage::FRAGMENT, false)
         .build(device);
 
     let pipeline_layout = device.create_pipeline_layout(
@@ -142,7 +141,6 @@ fn model(app: &App) -> Model {
         env,
 
         w_id,
-        tile_tex,
         render_pipeline,
         bind_group_0,
         bind_group_layout_1,
@@ -162,13 +160,13 @@ fn view(app: &App, model: &Model, frame: Frame) {
     render_pass.set_pipeline(&model.render_pipeline);
 
     // DRAW BACKGROUND
-    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1, (-model.env.player.movement.x_pos(), model.env.player.movement.y_pos()), wgpu::Color::BLACK);
+    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1, (-model.env.player.movement.x_pos(), model.env.player.movement.y_pos()), wgpu::Color::WHITE);
     render_pass.set_bind_group(1, &bind_group_1, &[]);
     render_pass.set_vertex_buffers(0, &[(&model.grid.vertices, 0)]);
     render_pass.draw(0..model.grid.num_vertices, 0..1);
 
     // DRAW PLAYER
-    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1, (0.0, 0.0), wgpu::Color::BLACK);
+    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1, (0.0, 0.0), wgpu::Color::WHITE);
     render_pass.set_bind_group(1, &bind_group_1, &[]);
     render_pass.set_vertex_buffers(0, &[(&model.env.player.tile.make_buffer(device), 0)]);
     render_pass.draw(0..6, 0..1);
@@ -192,7 +190,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
 
         let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
             (mob.movement.x_pos() - model.env.player.movement.x_pos(), model.env.player.movement.y_pos()- mob.movement.y_pos()),
-            wgpu::Color::BLACK
+            wgpu::Color::WHITE
         );
         render_pass.set_bind_group(1, &bind_group_1, &[]);
         render_pass.set_vertex_buffers(0, &[(&mob.tile.make_buffer(device), 0)]);
@@ -201,10 +199,16 @@ fn view(app: &App, model: &Model, frame: Frame) {
 }
 
 fn create_bind_group_1(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, transform: (f32, f32), color: wgpu::Color) -> wgpu::BindGroup {
-    let buffer_data = [transform.0 / WINDOW_RES_X, transform.1 / WINDOW_RES_Y];
-    let buffer_bytes: &[u8] = bytemuck::cast_slice(&buffer_data);
-    let buffer = device.create_buffer_mapped(buffer_bytes.len(), wgpu::BufferUsage::UNIFORM).fill_from_slice(buffer_bytes);
+    let transform_buffer_data = [transform.0 / WINDOW_RES_X, transform.1 / WINDOW_RES_Y];
+    let transform_buffer_bytes: &[u8] = bytemuck::cast_slice(&transform_buffer_data);
+    let transform_buffer = device.create_buffer_mapped(transform_buffer_bytes.len(), wgpu::BufferUsage::UNIFORM).fill_from_slice(transform_buffer_bytes);
+
+    let color_buffer_data = [color.r as f32, color.g as f32, color.b as f32, color.a as f32];
+    let color_buffer_bytes: &[u8] = bytemuck::cast_slice(&color_buffer_data);
+    let color_buffer = device.create_buffer_mapped(color_buffer_bytes.len(), wgpu::BufferUsage::UNIFORM).fill_from_slice(color_buffer_bytes);
+
     wgpu::BindGroupBuilder::new()
-        .buffer_bytes(&buffer, 0..(buffer_bytes.len() as u64))
+        .buffer_bytes(&transform_buffer, 0..(transform_buffer_bytes.len() as u64))
+        .buffer_bytes(&color_buffer, 0..(color_buffer_bytes.len() as u64))
         .build(device, layout)
 }

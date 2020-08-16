@@ -61,31 +61,6 @@ impl Grid {
             }
         }
 
-        /*grid.push(Vertex{
-            point: [0.0, 0.0],
-            tex_coords: [0.0, 0.0],
-        });
-        grid.push(Vertex{
-            point: [1.0, 0.0],
-            tex_coords: [1.0, 0.0],
-        });
-        grid.push(Vertex{
-            point: [0.0, 1.0],
-            tex_coords: [0.0, 1.0],
-        });
-        grid.push(Vertex{
-            point: [1.0, 0.0],
-            tex_coords: [1.0, 0.0],
-        });
-        grid.push(Vertex{
-            point: [0.0, 1.0],
-            tex_coords: [0.0, 1.0],
-        });
-        grid.push(Vertex{
-            point: [1.0, 1.0],
-            tex_coords: [1.0, 1.0],
-        });*/
-
         let vertices_bytes: &[u8] = bytemuck::cast_slice(&grid);
         let vertex_buffer = device.create_buffer_mapped(vertices_bytes.len(), wgpu::BufferUsage::VERTEX).fill_from_slice(vertices_bytes);
 
