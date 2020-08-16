@@ -6,6 +6,8 @@ use nannou::wgpu;
 pub use grid::Grid;
 pub use tile::Tile;
 
+use crate::constants::{TILE_RES, ZOOM, WINDOW_RES_X, WINDOW_RES_Y};
+
 use serde::Deserialize;
 
 #[repr(C)]
@@ -34,11 +36,15 @@ impl wgpu::VertexDescriptor for Vertex {
     ];
 }
 
-/*impl From<Vertex> for (Point3, Point2) {
-    fn from(v: Vertex) -> Self {
-        (v.point, v.tex_coords)
-    }
-}*/
+// Coords
+pub fn from_internal_to_screen(internal_x: f32, internal_y: f32) -> (f32, f32) {
+    const SCALE_X: f32 = 2.0 * TILE_RES * ZOOM / WINDOW_RES_X;
+    const SCALE_Y: f32 = 2.0 * TILE_RES * ZOOM / WINDOW_RES_Y;
+    (
+        (internal_x * SCALE_X) - 1.0,
+        (internal_y * SCALE_Y) - 1.0,
+    )
+}
 
 #[derive(Eq, Ord, PartialOrd, PartialEq, Clone, Hash, Copy, Deserialize, Debug)]
 pub struct IPoint2 {

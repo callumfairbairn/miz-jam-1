@@ -16,7 +16,7 @@ use nannou::{
 };
 
 use constants::{WINDOW_RES_X, WINDOW_RES_Y};
-use tile::{Grid, Tile};
+use tile::{Grid, Tile, from_internal_to_screen};
 use event::event;
 use update::update;
 use level::{
@@ -160,7 +160,10 @@ fn view(app: &App, model: &Model, frame: Frame) {
     render_pass.set_pipeline(&model.render_pipeline);
 
     // DRAW BACKGROUND
-    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1, (-model.env.player.movement.x_pos(), model.env.player.movement.y_pos()), wgpu::Color::WHITE);
+    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
+        from_internal_to_screen(-model.env.player.movement.x_pos(), model.env.player.movement.y_pos()),
+        wgpu::Color::WHITE
+    );
     render_pass.set_bind_group(1, &bind_group_1, &[]);
     render_pass.set_vertex_buffers(0, &[(&model.grid.vertices, 0)]);
     render_pass.draw(0..model.grid.num_vertices, 0..1);
@@ -189,7 +192,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
         }).*/
 
         let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
-            (mob.movement.x_pos() - model.env.player.movement.x_pos(), model.env.player.movement.y_pos()- mob.movement.y_pos()),
+            from_internal_to_screen(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
             wgpu::Color::WHITE
         );
         render_pass.set_bind_group(1, &bind_group_1, &[]);
@@ -199,7 +202,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
 }
 
 fn create_bind_group_1(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, transform: (f32, f32), color: wgpu::Color) -> wgpu::BindGroup {
-    let transform_buffer_data = [transform.0 / WINDOW_RES_X, transform.1 / WINDOW_RES_Y];
+    let transform_buffer_data = [transform.0, transform.1];
     let transform_buffer_bytes: &[u8] = bytemuck::cast_slice(&transform_buffer_data);
     let transform_buffer = device.create_buffer_mapped(transform_buffer_bytes.len(), wgpu::BufferUsage::UNIFORM).fill_from_slice(transform_buffer_bytes);
 

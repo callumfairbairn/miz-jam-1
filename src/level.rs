@@ -163,22 +163,14 @@ fn get_tile_coord(possible_tiles: &Vec<IPoint2>, mut rng: ThreadRng) -> IPoint2 
 }
 
 pub fn generate_starting_position(level: &Level) -> (f64, f64) {
-    use crate::constants::*;
-
     let mut rng = rand::thread_rng();
 
-    let mut x;
-    let mut y;
     loop {
-        y = rng.gen_range(0, level.floor.len());
-        x = rng.gen_range(0, level.floor[y].len());
+        let y = rng.gen_range(0, level.floor.len());
+        let x = rng.gen_range(0, level.floor[y].len());
         if level.floor[y][x].is_some() && !level.floor[y][x].as_ref().unwrap().solid {
-            let quad_size_x = TILE_RES * ZOOM;
-            let quad_size_y = TILE_RES * ZOOM;
-
-            let vertex_x_coord = quad_size_x * (x as f32) - (WINDOW_RES_X / 2.0);
-            let vertex_y_coord = quad_size_y * (y as f32) - (WINDOW_RES_Y / 2.0);
-            return (vertex_x_coord as f64, vertex_y_coord as f64)
+            println!("Spawning at {}, {}", x, y);
+            return (x as f64, y as f64);
         }
     }
 }

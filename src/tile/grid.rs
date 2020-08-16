@@ -14,8 +14,8 @@ pub struct Grid {
 impl Grid {
     pub fn new_from_level(level: &Level, texture_size: &[u32; 2], device: &nannou::wgpu::Device) -> Self {
         let mut grid = Vec::new();
-        let quad_size_x = (2.0 * TILE_RES * ZOOM) / WINDOW_RES_X;
-        let quad_size_y = (2.0 * TILE_RES * ZOOM) / WINDOW_RES_Y;
+        let quad_size_x = 2.0 * (TILE_RES * ZOOM) / WINDOW_RES_X;
+        let quad_size_y = 2.0 * (TILE_RES * ZOOM) / WINDOW_RES_Y;
 
         let tile_tex_size_x = TILE_RES / (texture_size[0] as f32);
         let tile_tex_size_y = TILE_RES / (texture_size[1] as f32);
@@ -24,8 +24,8 @@ impl Grid {
             for (x, tile) in row.iter().enumerate() {
 
                 if let Some(tile_data) = tile {
-                    let vertex_x_coord = quad_size_x * (x as f32) - 3.0;
-                    let vertex_y_coord = quad_size_y * (y as f32) - 3.0;
+                    let vertex_x_coord = quad_size_x * (x as f32) - 1.0;
+                    let vertex_y_coord = quad_size_y * (y as f32) - 1.0;
 
                     let tilesheet_x_pix_coord = (tile_data.tile_coord.x as f32) * (TILE_RES + GAP_BETWEEN_TILES);
                     let tilesheet_y_pix_coord = (tile_data.tile_coord.y as f32) * (TILE_RES + GAP_BETWEEN_TILES);
