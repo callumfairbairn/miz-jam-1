@@ -35,6 +35,7 @@ use animation::{
     AnimationAction,
     AnimationState
 };
+use crate::level::spades;
 
 pub struct Model {
     grid: Grid,
@@ -134,7 +135,7 @@ fn model(app: &App) -> Model {
         .primitive_topology(wgpu::PrimitiveTopology::TriangleList)
         .build(device);
 
-    let level = generate_level(hearts());
+    let level = generate_level(spades());
     let grid = Grid::new_from_level(&level, &tile_tex.size(), device);
     let player_entity = EntityFactory::new(Entity::new_pawn());
 

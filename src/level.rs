@@ -30,13 +30,13 @@ pub struct Suit {
 pub fn hearts() -> Suit {
     Suit {
         floor_tiles: vec![IPoint2{x: 5, y: 0}, IPoint2{x: 6, y: 0}, IPoint2{x: 7, y: 0}],
-        wall_tiles: vec![IPoint2{x: 0, y: 1}, IPoint2{x: 0, y: 2}, IPoint2{x: 1, y: 1}]
+        wall_tiles: vec![IPoint2{x: 0, y: 1}, IPoint2{x: 1, y: 1}, IPoint2{x: 2, y: 1}, IPoint2{x: 3, y: 1}],
     }
 }
 
-pub fn _spades() -> Suit {
+pub fn spades() -> Suit {
     Suit {
-        floor_tiles: vec![IPoint2{x: 19, y: 1}],
+        floor_tiles: vec![IPoint2{x: 2, y: 0}, IPoint2{x: 16, y: 0}, IPoint2{x: 17, y: 0}],
         wall_tiles: vec![IPoint2{x: 10, y: 17}, IPoint2{x: 10, y: 18}, IPoint2{x: 11, y: 18}]
     }
 }
