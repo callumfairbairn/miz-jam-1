@@ -1,7 +1,7 @@
 use bitflags::bitflags;
 use crate::level::Level;
-use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y};
-use crate::level::Side::{LEFT, RIGHT, UP, DOWN};
+use crate::constants::{WINDOW_RES_X, TILE_RES, ZOOM, WINDOW_RES_Y, COLLISION_MULTIPLIER};
+use crate::level::Side::{LEFT, RIGHT, TOP, BOTTOM};
 
 bitflags! {
     #[derive(Default)]
@@ -163,7 +163,7 @@ impl MovementState {
         };
 
         let mut collision = false;
-        let mut collision_directions = Vec::new();
+        let mut collision_direction = RIGHT;
 
         for (y, row) in level.floor.iter().enumerate() {
             for (x, tile) in row.iter().enumerate() {
@@ -181,36 +181,37 @@ impl MovementState {
 
                         if player_rect.collides_with(&tile_rect) {
                             collision = true;
-                            if tile.exposed_sides.contains(&LEFT) && new_x_velo > 0.0 {
-                                collision_directions.push("x")
-                            }
-                            if tile.exposed_sides.contains(&RIGHT) && new_x_velo < 0.0 {
-                                collision_directions.push("x")
-                            }
-                            if tile.exposed_sides.contains(&UP) && new_y_velo < 0.0 {
-                                collision_directions.push("y")
-                            }
-                            if tile.exposed_sides.contains(&DOWN) && new_y_velo > 0.0 {
-                                collision_directions.push("y")
-                            }
+                            collision_direction = player_rect.get_nearest_wall(&tile_rect)
                         }
                     }
                 }
             }
         }
 
-    if collision_directions.contains(&"x") {
-        self.x_velo = -new_x_velo * 0.5;
-    } else {
-        self.x_velo = new_x_velo;
-        self.x = new_x;
-    }
-    if collision_directions.contains(&"y") {
-        self.y_velo = -new_y_velo * 0.5;
-    } else {
-        self.y_velo = new_y_velo;
-        self.y = new_y;
-    }
+        if collision {
+            if collision_direction == TOP {
+                self.x = new_x;
+                self.x_velo = new_x_velo * COLLISION_MULTIPLIER;
+                self.y_velo = -new_y_velo * COLLISION_MULTIPLIER;
+            } else if collision_direction == BOTTOM {
+                self.x = new_x;
+                self.x_velo = new_x_velo * COLLISION_MULTIPLIER;
+                self.y_velo = -new_y_velo * COLLISION_MULTIPLIER;
+            } else if collision_direction == LEFT {
+                self.y = new_y;
+                self.y_velo = new_y_velo * COLLISION_MULTIPLIER;
+                self.x_velo = -new_x_velo * COLLISION_MULTIPLIER;
+            } else {
+                self.y = new_y;
+                self.y_velo = new_y_velo * COLLISION_MULTIPLIER;
+                self.x_velo = -new_x_velo * COLLISION_MULTIPLIER;
+            }
+        } else {
+            self.x = new_x;
+            self.y = new_y;
+            self.x_velo = new_x_velo;
+            self.y_velo = new_y_velo;
+        }
     }
 
     pub fn x_pos(&self) -> f32 {
