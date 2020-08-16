@@ -53,7 +53,8 @@ impl Rect {
         let between_y = (self.top() < other.top() && self.bottom() > other.top()) ||
             (self.top() < other.bottom() && self.bottom() > other.bottom());
 
-        between_x && between_y
+        (between_x && between_y) || (between_x && self.top() == other.top() && self.bottom() == other.bottom())
+            || (between_y && self.left() == other.left() && self.left() == other.left())
     }
 
     fn left(&self) -> f32 {
