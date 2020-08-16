@@ -1,3 +1,5 @@
+use nannou::wgpu;
+
 // Number of tiles per edge = WINDOW_RES / (TILE_RES * ZOOM))
 pub(crate) const GAP_BETWEEN_TILES: f32 = 1.0;
 
@@ -13,3 +15,27 @@ pub(crate) const EROSION_CHANCE: f64 = 0.25;
 pub(crate) const EROSION_TIMES: i32 = 2;
 
 pub(crate) const COLLISION_MULTIPLIER: f64 = 0.2;
+
+pub(crate) const HEARTS_BACKGROUND_COLOUR: wgpu::Color = wgpu::Color{
+    r: 0.02,
+    g: 0.0,
+    b: 0.0,
+    a: 0.0
+};
+
+pub(crate) const DIAMONDS_BACKGROUND_COLOUR: wgpu::Color = wgpu::Color{
+    r: 0.02,
+    g: 0.0,
+    b: 0.02,
+    a: 0.0
+};
+
+pub(crate) const CLUBS_BACKGROUND_COLOUR: wgpu::Color = wgpu::Color{
+    r: 0.0,
+    g: 0.0,
+    b: 0.02,
+    a: 0.0
+};
+
+pub(crate) const SPADES_BACKGROUND_COLOUR: wgpu::Color = wgpu::Color::BLACK;
+
