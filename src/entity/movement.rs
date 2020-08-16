@@ -65,8 +65,8 @@ pub struct MovementState {
 impl MovementState {
     pub fn new((x, y): (f64, f64)) -> Self {
         Self {
-            x: x as f64,
-            y: y as f64,
+            x: x,
+            y: y,
 
             x_velo: 0.0,
             y_velo: 0.0
@@ -130,7 +130,7 @@ impl MovementState {
             } else {
                 0.0
             },
-            YMove::Up => if self.y_velo < 0.0 {
+            YMove::Down => if self.y_velo < 0.0 {
                 self.y_velo + decel
             } else if self.y_velo < max_speed_y {
                 let new_y_velo = self.y_velo + accel;
@@ -140,7 +140,7 @@ impl MovementState {
             } else {
                 max_speed_y
             },
-            YMove::Down => if self.y_velo > 0.0 {
+            YMove::Up => if self.y_velo > 0.0 {
                 self.y_velo - decel
             } else if self.y_velo > -max_speed_y {
                 let new_y_velo = self.y_velo - accel;
@@ -159,7 +159,7 @@ impl MovementState {
 
         let player_rect = crate::rect::Rect{
             pos: (new_x as f32, new_y as f32),
-            size: (32.0, 32.0)
+            size: (1.0, 1.0)
         };
 
         let mut collision = false;
@@ -170,13 +170,9 @@ impl MovementState {
                 if tile.is_some() {
                     let tile = tile.as_ref().unwrap();
                     if tile.solid {
-                        let quad_size = TILE_RES * ZOOM;
-                        let vertex_x = quad_size * (x as f32) - (WINDOW_RES_X / 2.0);
-                        let vertex_y = quad_size * (y as f32) - (WINDOW_RES_Y / 2.0);
-
                         let tile_rect = crate::rect::Rect {
-                            pos: (vertex_x, vertex_y),
-                            size: (quad_size, quad_size),
+                            pos: (x as f32, y as f32),
+                            size: (1.0, 1.0),
                         };
 
                         if player_rect.collides_with(&tile_rect) {

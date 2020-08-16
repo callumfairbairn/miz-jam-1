@@ -18,7 +18,7 @@ impl EnvironmentState {
     pub fn new(player: Instance, level: &Level, size: &[u32; 2]) -> Self {
         // FOR DEMO PURPOSES:
         let card2_spawner = EntityFactory::new(Entity::card_2());
-        let card2_instance = card2_spawner.spawn(generate_starting_position(level), Tile::new(21, 16, size));
+        let card2_instance = card2_spawner.spawn((player.movement.x_pos() as f64, player.movement.y_pos() as f64), Tile::new(21, 16, size));
 
         Self {
             player: player,

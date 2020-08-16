@@ -16,7 +16,7 @@ use nannou::{
 };
 
 use constants::{WINDOW_RES_X, WINDOW_RES_Y};
-use tile::{Grid, Tile, from_internal_to_screen};
+use tile::{Grid, Tile, from_internal_to_screen, from_internal_to_offset};
 use event::event;
 use update::update;
 use level::{
@@ -159,9 +159,11 @@ fn view(app: &App, model: &Model, frame: Frame) {
     render_pass.set_bind_group(0, &model.bind_group_0, &[]);
     render_pass.set_pipeline(&model.render_pipeline);
 
+    let (s_x, s_y) = from_internal_to_screen(model.env.player.movement.x_pos(), model.env.player.movement.y_pos());
+
     // DRAW BACKGROUND
     let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
-        from_internal_to_screen(-model.env.player.movement.x_pos(), model.env.player.movement.y_pos()),
+        (-s_x, -s_y),
         wgpu::Color::WHITE
     );
     render_pass.set_bind_group(1, &bind_group_1, &[]);
@@ -169,7 +171,10 @@ fn view(app: &App, model: &Model, frame: Frame) {
     render_pass.draw(0..model.grid.num_vertices, 0..1);
 
     // DRAW PLAYER
-    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1, (0.0, 0.0), wgpu::Color::WHITE);
+    let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
+        (0.0, 0.0),
+        wgpu::Color::WHITE
+    );
     render_pass.set_bind_group(1, &bind_group_1, &[]);
     render_pass.set_vertex_buffers(0, &[(&model.env.player.tile.make_buffer(device), 0)]);
     render_pass.draw(0..6, 0..1);
@@ -192,7 +197,7 @@ fn view(app: &App, model: &Model, frame: Frame) {
         }).*/
 
         let bind_group_1 = create_bind_group_1(device, &model.bind_group_layout_1,
-            from_internal_to_screen(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
+            from_internal_to_offset(mob.movement.x_pos() - model.env.player.movement.x_pos(), mob.movement.y_pos() - model.env.player.movement.y_pos()),
             wgpu::Color::WHITE
         );
         render_pass.set_bind_group(1, &bind_group_1, &[]);

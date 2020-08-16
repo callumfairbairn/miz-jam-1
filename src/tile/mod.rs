@@ -46,6 +46,15 @@ pub fn from_internal_to_screen(internal_x: f32, internal_y: f32) -> (f32, f32) {
     )
 }
 
+pub fn from_internal_to_offset(internal_x: f32, internal_y: f32) -> (f32, f32) {
+    const SCALE_X: f32 = 2.0 * TILE_RES * ZOOM / WINDOW_RES_X;
+    const SCALE_Y: f32 = 2.0 * TILE_RES * ZOOM / WINDOW_RES_Y;
+    (
+        (internal_x * SCALE_X),
+        (internal_y * SCALE_Y),
+    )
+}
+
 #[derive(Eq, Ord, PartialOrd, PartialEq, Clone, Hash, Copy, Deserialize, Debug)]
 pub struct IPoint2 {
     pub x: usize,
