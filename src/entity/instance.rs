@@ -10,8 +10,8 @@ use crate::{
 use std::rc::Rc;
 use std::collections::VecDeque;
 use crate::level::Level;
-use crate::entity::random_direction;
-use crate::constants::{AI_IDLE_WAIT_TIME, AI_IDLE_MOVEMENT_TIME};
+use crate::entity::{random_direction, distance_between};
+use crate::constants::{AI_IDLE_WAIT_TIME, AI_IDLE_MOVEMENT_TIME, AI_CHASE_DISTANCE_MAX, AI_ATTACK_DISTANCE};
 
 pub struct InstanceState<'a> {
     pub pos: (f32, f32),
@@ -129,10 +129,43 @@ impl Instance {
         }
     }
 
+    fn ai_chase(&mut self, player: &Instance) {
+        let x_diff = self.movement.x_pos() - player.movement.x_pos();
+        let y_diff = self.movement.y_pos() - player.movement.y_pos();
 
-    pub fn ai_tick(&mut self, level: &Level) {
+        if x_diff < 0.0 {
+            self.state.direction.insert(Direction::RIGHT);
+            self.state.direction.remove(Direction::LEFT);
+        }
+        if x_diff > 0.0 {
+            self.state.direction.insert(Direction::LEFT);
+            self.state.direction.remove(Direction::RIGHT);
+        }
+        if y_diff < 0.0 {
+            self.state.direction.insert(Direction::DOWN);
+            self.state.direction.remove(Direction::UP);
+        }
+        if y_diff > 0.0 {
+            self.state.direction.insert(Direction::UP);
+            self.state.direction.remove(Direction::DOWN);
+        }
+    }
+
+    fn ai_attack(&mut self) {
+        self.state.set_direction(Default::default())
+    }
+
+    pub fn ai_tick(&mut self, player: &Instance, level: &Level) {
         if self.state.is_active() {
-            self.ai_idle();
+            let distance = distance_between(self.movement.x_pos(), self.movement.y_pos(), player.movement.x_pos(), player.movement.y_pos());
+            if distance < AI_ATTACK_DISTANCE {
+                self.ai_attack()
+            }
+            else if distance < AI_CHASE_DISTANCE_MAX {
+                self.ai_chase(player);
+            } else {
+                self.ai_idle();
+            }
             self.movement.tick(self.class.movement_attrs(), self.state.direction, level);
             self.state.increment_tick_tracker();
         }

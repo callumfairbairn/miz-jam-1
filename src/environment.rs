@@ -44,7 +44,7 @@ impl EnvironmentState {
 
     pub fn mob_tick(&mut self, level: &Level) {
         for mob in self.mobs.iter_mut() {
-            mob.ai_tick(level);
+            mob.ai_tick(&self.player, level);
             if let Some(a) = mob.animations.front_mut() {
                 if a.tick() {
                     mob.animations.pop_front();

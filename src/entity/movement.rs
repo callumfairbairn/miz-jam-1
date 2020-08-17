@@ -55,6 +55,10 @@ pub fn random_direction() -> Direction {
     Direction::RIGHT
 }
 
+pub fn distance_between(x1: f32, y1: f32, x2: f32, y2: f32) -> f32 {
+    ((x1 - x2).powf(2.0) + (y1 - y2).powf(2.0)).sqrt()
+}
+
 // Defines the core attributes of an entity's movement.
 pub struct MovementAttributes {
     pub attack: f64,  // 0->(sustain) in (attack) ticks
