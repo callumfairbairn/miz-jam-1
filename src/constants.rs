@@ -14,7 +14,7 @@ pub(crate) const CHUNK_NUM: usize = 1;
 pub(crate) const EROSION_CHANCE: f64 = 0.25;
 pub(crate) const EROSION_TIMES: i32 = 2;
 
-pub(crate) const COLLISION_MULTIPLIER: f64 = 0.2;
+pub(crate) const COLLISION_MULTIPLIER: f64 = 0.5;
 
 pub(crate) const AI_IDLE_WAIT_TIME: i32 = 40;
 pub(crate) const AI_IDLE_MOVEMENT_TIME: i32 = 6;

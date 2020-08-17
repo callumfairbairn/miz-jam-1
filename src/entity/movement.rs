@@ -1,6 +1,6 @@
 use bitflags::bitflags;
 use crate::level::Level;
-use crate::constants::{COLLISION_MULTIPLIER};
+use crate::constants::{COLLISION_MULTIPLIER, TILE_RES};
 use crate::level::Side::{LEFT, RIGHT, TOP, BOTTOM};
 use rand::Rng;
 
@@ -198,15 +198,33 @@ impl MovementState {
             }
         }
 
+        let push_out_of_wall_amount = 0.25 / TILE_RES as f64;
+
         if collision {
             if collision_directions.contains(&TOP) || collision_directions.contains(&BOTTOM) {
-                self.y_velo = -new_y_velo * COLLISION_MULTIPLIER;
+                if new_y_velo == 0.0 {
+                    if collision_directions.contains(&TOP) {
+                        self.y = new_y + push_out_of_wall_amount;
+                    } else {
+                        self.y = new_y - push_out_of_wall_amount;
+                    }
+                } else {
+                    self.y_velo = -new_y_velo * COLLISION_MULTIPLIER;
+                }
             } else {
                 self.y = new_y;
                 self.y_velo = new_y_velo;
             }
             if collision_directions.contains(&LEFT) || collision_directions.contains(&RIGHT) {
-                self.x_velo = -new_x_velo * COLLISION_MULTIPLIER;
+                if new_x_velo == 0.0 {
+                    if collision_directions.contains(&LEFT) {
+                        self.x = self.x - push_out_of_wall_amount;
+                    } else {
+                        self.x = self.x + push_out_of_wall_amount;
+                    }
+                } else {
+                    self.x_velo = -new_x_velo * COLLISION_MULTIPLIER;
+                }
             } else {
                 self.x = new_x;
                 self.x_velo = new_x_velo;
