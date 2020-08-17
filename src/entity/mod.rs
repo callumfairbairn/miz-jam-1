@@ -57,7 +57,7 @@ impl Entity {
     pub fn card_2() -> Entity {
         Self {
             move_attrs: MovementAttributes {
-                attack: 3.0,
+                attack: 8.0,
                 sustain: 5.0 / 32.0,
                 release:  7.0
             },

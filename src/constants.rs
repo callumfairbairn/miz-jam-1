@@ -10,7 +10,7 @@ pub(crate) const WINDOW_RES_Y: f32 = 640.0; // This must be a multiple of TILE_R
 
 pub(crate) const CHUNK_SIZE: usize = 15;
 pub(crate) const LAYOUT_DIM: usize = 5;
-pub(crate) const CHUNK_NUM: usize = 1;
+pub(crate) const CHUNK_NUM: usize = 2;
 pub(crate) const EROSION_CHANCE: f64 = 0.25;
 pub(crate) const EROSION_TIMES: i32 = 2;
 
